@@ -1,4 +1,4 @@
-package com.bigbingo.brickfinder.ui.screens.homescreen.componets
+package com.bigbingo.brickfinder.ui.screens.homepage.componets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

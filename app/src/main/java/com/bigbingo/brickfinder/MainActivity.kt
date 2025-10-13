@@ -12,7 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import com.bigbingo.brickfinder.ui.screens.homescreen.HomeScreen
+import com.bigbingo.brickfinder.ui.screens.homepage.HomeScreen
 import com.bigbingo.brickfinder.ui.theme.BrickFinderTheme
 
 class MainActivity : ComponentActivity() {
@@ -36,8 +36,10 @@ fun MainContent() {
     ) { innerPadding ->
         when (selectedIndex) {
             0 -> {}
-            1 -> HomeScreen(modifier = Modifier.padding(innerPadding))
+            1 -> HomeScreen(modifier = Modifier.padding(innerPadding), onNavigate = { selectedIndex = it })
             2 -> {}
+            3 -> {}
+            4 -> {}
         }
     }
 }
@@ -45,7 +47,7 @@ fun MainContent() {
 @Composable
 fun BottomNavigationBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
     NavigationBar {
-        NavigationBarItem(
+           NavigationBarItem(
             icon = { Icon(Icons.Default.Favorite, contentDescription = "WantedList") },
             selected = selectedIndex == 0,
             onClick = { onItemSelected(0) }
