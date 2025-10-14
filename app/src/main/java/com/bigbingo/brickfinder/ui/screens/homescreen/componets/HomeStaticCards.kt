@@ -13,6 +13,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.res.painterResource
 import coil.compose.AsyncImage
@@ -31,7 +32,7 @@ fun HomeStaticCards(onNavigate: (Int) -> Unit) {
                 .height(180.dp)
                 .clickable { onNavigate(3) },
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            shape = RoundedCornerShape(5.dp),
+            shape = RoundedCornerShape(0.dp),
             border = BorderStroke(2.dp, Color.LightGray)
         ) {
             Column(
@@ -49,12 +50,24 @@ fun HomeStaticCards(onNavigate: (Int) -> Unit) {
                     painter = painterResource(R.drawable.catalog_parts),
                     contentDescription = null,
                     modifier = Modifier
-                        .height(70.dp)
+                        .height(85.dp)
                         .fillMaxWidth()
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Parts", fontSize = 18.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0x80daeef6))
+                        .padding(vertical = 5.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Parts",
+                        fontSize = 16.sp,
+                        color = Color.Black
+                    )
+                }
             }
         }
 
@@ -64,8 +77,8 @@ fun HomeStaticCards(onNavigate: (Int) -> Unit) {
                 .height(180.dp)
                 .clickable { onNavigate(4) },
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            shape = RoundedCornerShape(5.dp),
-            border = BorderStroke(2.dp, Color.LightGray)
+            shape = RoundedCornerShape(0.dp),
+            border = BorderStroke(1.dp, Color.LightGray)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -79,8 +92,20 @@ fun HomeStaticCards(onNavigate: (Int) -> Unit) {
                         .height(100.dp)
                         .fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Sets", fontSize = 18.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0x80f5efd6))
+                        .padding(vertical = 5.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Sets",
+                        fontSize = 16.sp,
+                        color = Color.Black
+                    )
+                }
             }
         }
     }

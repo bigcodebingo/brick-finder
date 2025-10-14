@@ -1,7 +1,7 @@
 package com.bigbingo.brickfinder.helpers
 
 import android.content.Context
-import java.io.BufferedReader
+import com.opencsv.CSVReader
 import java.io.InputStreamReader
 
 fun <T> loadCsv(
@@ -10,16 +10,13 @@ fun <T> loadCsv(
     parseLine: (List<String>) -> T?
 ): List<T> {
     val list = mutableListOf<T>()
-    val inputStream = context.assets.open(fileName)
-    val reader = BufferedReader(InputStreamReader(inputStream))
-
-    reader.useLines { lines ->
-        lines.drop(1).forEach { line ->
-            val tokens = line.split(",")
-            val item = parseLine(tokens)
-            if (item != null) list.add(item)
+    context.assets.open(fileName).use { inputStream ->
+        CSVReader(InputStreamReader(inputStream)).use { reader ->
+            val allLines = reader.readAll()
+            allLines.drop(1).forEach { tokens ->
+                parseLine(tokens.toList())?.let { list.add(it) }
+            }
         }
     }
-
     return list
 }

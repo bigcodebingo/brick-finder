@@ -1,9 +1,10 @@
-package com.bigbingo.brickfinder.ui.screens.homepage.componets
+package com.bigbingo.brickfinder.ui.screens.partscreen.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
@@ -21,6 +22,7 @@ import com.bigbingo.brickfinder.data.PartCategory
 import coil.compose.AsyncImage
 import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 
 
 @Composable
@@ -28,29 +30,34 @@ fun CategoryCard(category: PartCategory) {
     Card(
         modifier = Modifier
             .width(160.dp)
-            .height(160.dp),
+            .height(180.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(5.dp),
-        border = BorderStroke(2.dp, Color.LightGray)
+        shape = RoundedCornerShape(0.dp),
+        border = BorderStroke(1.dp, Color.LightGray)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp),
+                .padding(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+            verticalArrangement = Arrangement.Center
         ) {
             AsyncImage(
                 model = category.imageUrl,
                 contentDescription = category.name,
                 modifier = Modifier
-                    .height(100.dp)
                     .fillMaxWidth()
+                    .fillMaxHeight(0.45f)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(18.dp))
             Text(
+                modifier = Modifier.fillMaxHeight(
+                    0.55f
+                ),
                 text = category.name + " (${category.part_count})",
-                fontSize = 14.sp
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center,
+                lineHeight = 12.sp
             )
         }
     }

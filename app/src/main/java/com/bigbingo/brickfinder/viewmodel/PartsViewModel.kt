@@ -4,11 +4,9 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bigbingo.brickfinder.data.PartCategory
-import com.bigbingo.brickfinder.data.network.ApiClient
 import com.bigbingo.brickfinder.helpers.loadCsv
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 

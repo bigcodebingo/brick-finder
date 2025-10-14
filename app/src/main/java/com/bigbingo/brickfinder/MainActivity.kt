@@ -12,7 +12,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import com.bigbingo.brickfinder.ui.screens.homepage.HomeScreen
+import androidx.compose.ui.graphics.Color
+import com.bigbingo.brickfinder.ui.screens.homescreen.HomeScreen
+import com.bigbingo.brickfinder.ui.screens.partscreen.PartScreen
 import com.bigbingo.brickfinder.ui.theme.BrickFinderTheme
 
 class MainActivity : ComponentActivity() {
@@ -29,16 +31,22 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainContent() {
-    var selectedIndex by remember { mutableStateOf(1) }
+    var selectedIndex by remember { mutableIntStateOf(1) }
 
     Scaffold(
+        containerColor = Color.White,
         bottomBar = { BottomNavigationBar(selectedIndex) { selectedIndex = it } }
     ) { innerPadding ->
         when (selectedIndex) {
             0 -> {}
-            1 -> HomeScreen(modifier = Modifier.padding(innerPadding), onNavigate = { selectedIndex = it })
+            1 -> HomeScreen(
+                modifier = Modifier.padding(innerPadding),
+                onNavigate = { selectedIndex = it }
+            )
             2 -> {}
-            3 -> {}
+            3 -> PartScreen(
+                modifier = Modifier.padding(innerPadding),
+            )
             4 -> {}
         }
     }
@@ -46,8 +54,9 @@ fun MainContent() {
 
 @Composable
 fun BottomNavigationBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
-    NavigationBar {
-           NavigationBarItem(
+    NavigationBar(containerColor = Color.White)
+    {
+        NavigationBarItem(
             icon = { Icon(Icons.Default.Favorite, contentDescription = "WantedList") },
             selected = selectedIndex == 0,
             onClick = { onItemSelected(0) }
