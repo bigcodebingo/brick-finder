@@ -29,16 +29,16 @@ import androidx.compose.ui.text.style.TextAlign
 fun CategoryCard(category: PartCategory) {
     Card(
         modifier = Modifier
-            .width(160.dp)
-            .height(180.dp),
+            .width(170.dp)
+            .height(175.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(0.dp),
+        shape = RoundedCornerShape(2.dp),
         border = BorderStroke(1.dp, Color.LightGray)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(4.dp),
+                .padding(2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -47,15 +47,15 @@ fun CategoryCard(category: PartCategory) {
                 contentDescription = category.name,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.45f)
+                    .fillMaxHeight(0.4f)
             )
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(15.dp))
             Text(
                 modifier = Modifier.fillMaxHeight(
-                    0.55f
+                    0.6f
                 ),
                 text = category.name + " (${category.part_count})",
-                fontSize = 12.sp,
+                fontSize = 9.sp,
                 textAlign = TextAlign.Center,
                 lineHeight = 12.sp
             )

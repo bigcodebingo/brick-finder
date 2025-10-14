@@ -33,7 +33,7 @@ fun HomeStaticCards(onNavigate: (Int) -> Unit) {
                 .clickable { onNavigate(3) },
             colors = CardDefaults.cardColors(containerColor = Color.White),
             shape = RoundedCornerShape(0.dp),
-            border = BorderStroke(2.dp, Color.LightGray)
+            border = BorderStroke(1.dp, Color.LightGray)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
