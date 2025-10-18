@@ -1,6 +1,6 @@
 package com.bigbingo.brickfinder.data.network
 
-import com.bigbingo.brickfinder.data.LegoPart
+import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.data.PartCategory
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -17,7 +17,8 @@ interface ApiService {
     suspend fun getPartsByCategory(
         @Header("Authorization") apiKey: String,
         @Query("part_cat_id") categoryId: Int
-    ): ApiResponse<LegoPart>
+
+    ): ApiResponse<Part>
 }
 
 data class ApiResponse<T>(
