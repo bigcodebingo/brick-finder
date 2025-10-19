@@ -20,7 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.bigbingo.brickfinder.data.Part
 
@@ -52,9 +54,10 @@ fun PartCard(part: Part) {
             Text(
                 modifier = Modifier.fillMaxHeight(0.55f),
                 text = part.part_num,
-                fontSize = 8.sp,
+                fontSize = 7.5.sp,
                 textAlign = TextAlign.Center,
-                lineHeight = 12.sp
+                lineHeight = 12.sp,
+                style = MaterialTheme.typography.bodyLarge
             )
         }
     }

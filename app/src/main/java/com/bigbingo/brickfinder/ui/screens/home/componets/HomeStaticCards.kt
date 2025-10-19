@@ -74,7 +74,7 @@ fun HomeStaticCards(onNavigate: (Int) -> Unit) {
             modifier = Modifier
                 .weight(1f)
                 .height(180.dp)
-                .clickable { onNavigate(4) },
+                .clickable { onNavigate(5) },
             colors = CardDefaults.cardColors(containerColor = Color.White),
             shape = RoundedCornerShape(0.dp),
             border = BorderStroke(1.dp, Color.LightGray)

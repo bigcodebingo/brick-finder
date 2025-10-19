@@ -28,7 +28,7 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Browse LEGO items", style = MaterialTheme.typography.titleMedium)
+        Text("Browse LEGO items", style = MaterialTheme.typography.bodyLarge)
         Spacer(modifier = Modifier.height(8.dp))
 
         HomeStaticCards(onNavigate = onNavigate)
@@ -37,6 +37,8 @@ fun HomeScreen(
 
         Text("Search history", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(8.dp))
+
+
     }
 }
 
