@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.bigbingo.brickfinder.data.PartCategory
 import coil.compose.AsyncImage
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 
@@ -57,7 +58,8 @@ fun CategoryCard(category: PartCategory, onClick: () -> Unit) {
                 text = category.name,
                 fontSize = 10.sp,
                 textAlign = TextAlign.Center,
-                lineHeight = 12.sp
+                lineHeight = 12.sp,
+                style = MaterialTheme.typography.bodyLarge
             )
         }
     }

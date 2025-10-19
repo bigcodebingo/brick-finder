@@ -40,9 +40,15 @@ fun MainContent() {
     var selectedIndex by remember { mutableIntStateOf(1) }
     var selectedCategoryId by remember { mutableStateOf<Int?>(null) }
 
+    val showBottomBar = selectedIndex in listOf(0, 1, 2)
+
     Scaffold(
         containerColor = Color.White,
-        bottomBar = { BottomNavigationBar(selectedIndex) { selectedIndex = it } }
+        bottomBar = {
+            if (showBottomBar) {
+                BottomNavigationBar(selectedIndex) { selectedIndex = it }
+            }
+        }
     ) { innerPadding ->
         when (selectedIndex) {
             0 -> {}
@@ -52,21 +58,21 @@ fun MainContent() {
             )
             2 -> {}
             3 -> PartScreen(
-                modifier = Modifier.padding(innerPadding),
                 onCategoryClick = { categoryId ->
                     selectedCategoryId = categoryId
-                    selectedIndex = 5
+                    selectedIndex = 4
                 },
-
+                onBack = { selectedIndex = 1 }
             )
-            4 -> {}
-            5 -> PartsByCategoryScreen(
+            4 -> PartsByCategoryScreen(
                 categoryId = selectedCategoryId ?: 0,
                 onBack = { selectedIndex = 3 }
             )
+            5 -> {}
         }
     }
 }
+
 
 @Composable
 fun BottomNavigationBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
