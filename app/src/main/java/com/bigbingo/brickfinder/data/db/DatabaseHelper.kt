@@ -39,36 +39,39 @@ object DatabaseHelper {
         return categories.sortedBy { it.name }
     }
 
-    fun getParts(context: Context, categoryId: Int? = null): List<Part> {
-        val parts = mutableListOf<Part>()
-        val db = getDatabase(context)
+    fun getPartsPage(context: Context, categoryId: Int, offset: Int, limit: Int): Pair<List<Part>, Int> {
+        val db = context.openOrCreateDatabase("brickfinder.db", Context.MODE_PRIVATE, null)
 
-        val query = if (categoryId != null) {
-            "SELECT part_num, name, part_cat_id, part_url, part_img_url FROM parts WHERE part_cat_id = ?"
-        } else {
-            "SELECT part_num, name, part_cat_id, part_url, part_img_url FROM parts"
-        }
+        val cursorTotal = db.rawQuery(
+            "SELECT COUNT(*) FROM parts WHERE part_cat_id = ?",
+            arrayOf(categoryId.toString())
+        )
+        cursorTotal.moveToFirst()
+        val total = cursorTotal.getInt(0)
+        cursorTotal.close()
 
-        val cursor = if (categoryId != null) {
-            db.rawQuery(query, arrayOf(categoryId.toString()))
-        } else {
-            db.rawQuery(query, null)
-        }
+        val cursor = db.rawQuery(
+            "SELECT part_num, name, part_cat_id, part_url, part_img_url FROM parts WHERE part_cat_id = ? LIMIT ? OFFSET ?",
+            arrayOf(categoryId.toString(), limit.toString(), offset.toString())
+        )
 
-        if (cursor.moveToFirst()) {
-            do {
-                val partNum = cursor.getString(cursor.getColumnIndexOrThrow("part_num"))
-                val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
-                val catId = cursor.getInt(cursor.getColumnIndexOrThrow("part_cat_id"))
-                val partUrl = cursor.getString(cursor.getColumnIndexOrThrow("part_url"))
-                val partImgUrl = cursor.getString(cursor.getColumnIndexOrThrow("part_img_url"))
-
-                parts.add(Part(partNum, name, catId, partUrl, partImgUrl))
-            } while (cursor.moveToNext())
+        val partsList = mutableListOf<Part>()
+        while (cursor.moveToNext()) {
+            val imageUrl = cursor.getString(4)
+                ?: "https://cdn.rebrickable.com/media/thumbs/nil.png/85x85p.png?1662040927.7130826"
+            partsList.add(
+                Part(
+                    part_num = cursor.getString(0),
+                    name = cursor.getString(1),
+                    part_cat_id = cursor.getInt(2),
+                    part_url = cursor.getString(3),
+                    part_img_url = imageUrl
+                )
+            )
         }
 
         cursor.close()
         db.close()
-        return parts
+        return Pair(partsList, total)
     }
 }
