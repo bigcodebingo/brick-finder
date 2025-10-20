@@ -35,7 +35,7 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Search history", style = MaterialTheme.typography.titleMedium)
+        Text("Search history", style = MaterialTheme.typography.bodyLarge)
         Spacer(modifier = Modifier.height(8.dp))
 
 

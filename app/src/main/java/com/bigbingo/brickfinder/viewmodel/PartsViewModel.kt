@@ -14,12 +14,31 @@ import kotlinx.coroutines.withContext
 
 class PartsViewModel : ViewModel() {
 
+    private val _allCategories = MutableStateFlow<List<PartCategory>>(emptyList())
     private val _categories = MutableStateFlow<List<PartCategory>>(emptyList())
     val categories: StateFlow<List<PartCategory>> = _categories
     private val _parts = MutableStateFlow<List<Part>>(emptyList())
+    val parts: StateFlow<List<Part>> = _parts
+    private val _totalParts = MutableStateFlow(0)
+    val totalParts: StateFlow<Int> = _totalParts
+    private val _selectedFilter = MutableStateFlow("All")
+    val selectedFilter: StateFlow<String> = _selectedFilter
 
     fun clearParts() {
         _parts.value = emptyList()
+    }
+
+    fun filterCategories(filter: String) {
+        _selectedFilter.value = filter
+        val all = _allCategories.value
+        _categories.value = when (filter) {
+            "Popular" -> all.filter { it.id in listOf(1,11,37,20,3,5,6,62,64,63,59,61,60,23,14,49,
+                9,51,8,12,52,40,26,25,19,67,15,36,35,29,16) }
+            "Minifigs" -> all.filter { it.name.contains("Minifig", ignoreCase = true) }
+            "Technic" -> all.filter { it.name.contains("Technic", ignoreCase = true) }
+            "Old" -> all.filter { it.id in listOf(42,48,50,66,43,78) }
+            else -> all
+        }
     }
 
     fun fetchCategoriesFromDb(context: Context) {
@@ -27,49 +46,18 @@ class PartsViewModel : ViewModel() {
             val list = withContext(Dispatchers.IO) {
                 DatabaseHelper.getCategories(context)
             }
-            _categories.value = list
+            _allCategories.value = list
+            filterCategories(_selectedFilter.value)
         }
     }
 
-    fun fetchPartsFromDb(context: Context, categoryId: Int? = null) {
-        viewModelScope.launch {
-            val list = withContext(Dispatchers.IO) {
-                DatabaseHelper.getParts(context, categoryId)
+    fun fetchPartsPageAsync(categoryId: Int, offset: Int, limit: Int, context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val (partsList, total) = DatabaseHelper.getPartsPage(context, categoryId, offset, limit)
+            withContext(Dispatchers.Main) {
+                _parts.value = partsList
+                _totalParts.value = total
             }
-            _parts.value = list
         }
-    }
-
-    fun fetchPartsPage(categoryId: Int, offset: Int, limit: Int, context: Context): Pair<List<Part>, Int> {
-        val db = context.openOrCreateDatabase("brickfinder.db", Context.MODE_PRIVATE, null)
-        val cursorTotal = db.rawQuery(
-            "SELECT COUNT(*) FROM parts WHERE part_cat_id = ?",
-            arrayOf(categoryId.toString())
-        )
-        cursorTotal.moveToFirst()
-        val total = cursorTotal.getInt(0)
-        cursorTotal.close()
-
-        val cursor = db.rawQuery(
-            "SELECT part_num, name, part_cat_id, part_url, part_img_url FROM parts WHERE part_cat_id = ? LIMIT ? OFFSET ?",
-            arrayOf(categoryId.toString(), limit.toString(), offset.toString())
-        )
-
-        val partsList = mutableListOf<Part>()
-        while (cursor.moveToNext()) {
-            val imageUrl = cursor.getString(4) ?: "https://cdn.rebrickable.com/media/thumbs/nil.png/85x85p.png?1662040927.7130826"
-            partsList.add(
-                Part(
-                    part_num = cursor.getString(0),
-                    name = cursor.getString(1),
-                    part_cat_id = cursor.getInt(2),
-                    part_url = cursor.getString(3),
-                    part_img_url = imageUrl
-                )
-            )
-        }
-        cursor.close()
-        db.close()
-        return Pair(partsList, total)
     }
 }
