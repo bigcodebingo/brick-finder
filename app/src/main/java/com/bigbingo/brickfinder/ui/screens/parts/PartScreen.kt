@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.ui.screens.parts.components.CategoryFilters
 import com.bigbingo.brickfinder.ui.screens.parts.components.CategoryGrid
-import com.bigbingo.brickfinder.ui.screens.parts.components.PartsTopBar
+import com.bigbingo.brickfinder.ui.screens.parts.components.CategoryTopBar
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,7 +30,7 @@ fun PartScreen(
 
     Scaffold(
         topBar = {
-            PartsTopBar(
+            CategoryTopBar(
                 titleText = "Category Tiles:",
                 onBack = onBack
             )

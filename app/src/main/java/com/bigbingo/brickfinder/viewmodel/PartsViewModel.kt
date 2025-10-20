@@ -44,7 +44,7 @@ class PartsViewModel : ViewModel() {
     fun fetchCategoriesFromDb(context: Context) {
         viewModelScope.launch {
             val list = withContext(Dispatchers.IO) {
-                DatabaseHelper.getCategories(context)
+                DatabaseHelper.getPartCategories(context)
             }
             _allCategories.value = list
             filterCategories(_selectedFilter.value)

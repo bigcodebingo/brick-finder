@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.PartsByCategoryScreen
 import com.bigbingo.brickfinder.ui.screens.home.HomeScreen
 import com.bigbingo.brickfinder.ui.screens.parts.PartScreen
+import com.bigbingo.brickfinder.ui.screens.sets.SetsScreen
+import com.bigbingo.brickfinder.ui.screens.setsbytheme.SetsThemeScreen
 import com.bigbingo.brickfinder.ui.theme.BrickFinderTheme
 
 class MainActivity : ComponentActivity() {
@@ -68,7 +70,14 @@ fun MainContent() {
                 categoryId = selectedCategoryId ?: 0,
                 onBack = { selectedIndex = 3 }
             )
-            5 -> {}
+            5 -> SetsScreen(
+                onBack = { selectedIndex = 1 },
+                onParentClick = { parentName -> selectedIndex = 6 },
+                onChildClick = { childName -> selectedIndex = 6 }
+            )
+            6 -> SetsThemeScreen(
+                onBack = { selectedIndex = 5 }
+            )
         }
     }
 }
