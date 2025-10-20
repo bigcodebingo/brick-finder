@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
-import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.components.PaginationBar
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.components.PartsGrid
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.components.PartsTopAppBar

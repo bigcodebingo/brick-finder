@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.data.PartCategory
+import com.bigbingo.brickfinder.data.SetTheme
 
 object DatabaseHelper {
 
@@ -20,10 +21,10 @@ object DatabaseHelper {
         return SQLiteDatabase.openDatabase(dbFile.path, null, SQLiteDatabase.OPEN_READWRITE)
     }
 
-    fun getCategories(context: Context): List<PartCategory> {
+    fun getPartCategories(context: Context): List<PartCategory> {
         val categories = mutableListOf<PartCategory>()
         val db = getDatabase(context)
-        val cursor = db.rawQuery("SELECT id, name, imageUrl FROM categories", null)
+        val cursor = db.rawQuery("SELECT id, name, imageUrl FROM part_categories", null)
 
         if (cursor.moveToFirst()) {
             do {
@@ -73,5 +74,25 @@ object DatabaseHelper {
         cursor.close()
         db.close()
         return Pair(partsList, total)
+    }
+
+    fun getAllSetThemes(context: Context): List<SetTheme> {
+        val db = getDatabase(context)
+        val cursor = db.rawQuery("SELECT id, name, parent_id FROM sets_themes", null)
+        val themes = mutableListOf<SetTheme>()
+        if (cursor.moveToFirst()) {
+            do {
+                themes.add(
+                    SetTheme(
+                        id = cursor.getInt(0),
+                        name = cursor.getString(1),
+                        parent_id = if (cursor.isNull(2)) null else cursor.getInt(2)
+                    )
+                )
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        db.close()
+        return themes.sortedBy { setTheme -> setTheme.name }
     }
 }
