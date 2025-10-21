@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.sp
 fun CategoryFilters(
     filters: List<String>,
     selectedFilter: String,
-    onFilterClick: (String) -> Unit
+    onFilterClick: (String) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),

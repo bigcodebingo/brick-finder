@@ -12,6 +12,13 @@ data class ThemeNode(
 
 class SetsViewModel : ViewModel() {
 
+    fun searchThemes(themes: List<SetTheme>, query: String): List<Pair<SetTheme, String?>> {
+        return themes.filter { it.name.contains(query, ignoreCase = true)
+        }.map { theme -> val parentName = themes.find { it.id == theme.parent_id }?.name
+            theme to parentName
+        }
+    }
+
     fun fetchSetThemes(context: Context): List<SetTheme> {
         return DatabaseHelper.getAllSetThemes(context)
     }
