@@ -41,6 +41,7 @@ class MainActivity : ComponentActivity() {
 fun MainContent() {
     var selectedIndex by remember { mutableIntStateOf(1) }
     var selectedCategoryId by remember { mutableStateOf<Int?>(null) }
+    var selectedThemeName by remember { mutableStateOf<String?>(null) }
 
     val showBottomBar = selectedIndex in listOf(0, 1, 2)
 
@@ -72,11 +73,22 @@ fun MainContent() {
             )
             5 -> SetsScreen(
                 onBack = { selectedIndex = 1 },
-                onParentClick = { parentName -> selectedIndex = 6 },
-                onChildClick = { childName -> selectedIndex = 6 }
+                onParentClick = { parentName ->
+                    selectedThemeName = parentName
+                    selectedIndex = 6
+                },
+                onChildClick = { childName ->
+                    selectedThemeName = childName
+                    selectedIndex = 6
+                },
+                onSearchNavigate = { themeName ->
+                    selectedThemeName = themeName
+                    selectedIndex = 6
+                }
             )
             6 -> SetsThemeScreen(
-                onBack = { selectedIndex = 5 }
+                onBack = { selectedIndex = 5 },
+                themeName = selectedThemeName ?: "Theme"
             )
         }
     }

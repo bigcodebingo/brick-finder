@@ -24,10 +24,10 @@ import androidx.compose.ui.unit.sp
 import com.bigbingo.brickfinder.viewmodel.ThemeNode
 
 @Composable
-fun TwoColumnScrollableThemeGridWithRightExtra(
+fun ThemeList(
     themes: List<ThemeNode>,
     onParentClick: (String) -> Unit = {},
-    onChildClick: (String) -> Unit = {}
+    onChildClick: (String) -> Unit = {},
     ) {
     val rightExtra = 31
     val leftCount = (themes.size - rightExtra) / 2

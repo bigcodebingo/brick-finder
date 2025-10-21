@@ -12,11 +12,14 @@ import com.bigbingo.brickfinder.ui.screens.setsbytheme.components.ThemeTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SetsThemeScreen(onBack: () -> Unit) {
+fun SetsThemeScreen(
+    onBack: () -> Unit,
+    themeName: String
+) {
     Scaffold(
         topBar = {
             ThemeTopBar(
-                titleText = "theme",
+                titleText = themeName,
                 onBack = onBack
             )
         },
