@@ -12,9 +12,10 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-@OptIn(ExperimentalMaterial3Api::class)
+@ExperimentalMaterial3Api
 @Composable
 fun SetsTopBar(
     titleText: String,
@@ -35,6 +36,8 @@ fun SetsTopBar(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         },
+
+        expandedHeight = 45.dp,
         colors = TopAppBarColors(
             containerColor = Color.White,
             scrolledContainerColor = Color.White,

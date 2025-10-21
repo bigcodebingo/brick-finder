@@ -64,6 +64,5 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.14")
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("androidx.graphics:graphics-shapes:1.0.1")
-    implementation("com.opencsv:opencsv:5.7.1")
 
 }
