@@ -1,8 +1,6 @@
 package com.bigbingo.brickfinder.ui.screens.parts
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalOverscrollConfiguration
-import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -48,7 +46,6 @@ fun PartScreen(
                 .padding(
                     start = 16.dp,
                     end = 16.dp,
-                    bottom = 16.dp
                 )
         ) {
             val selectedFilter by viewModel.selectedFilter.collectAsState()
