@@ -102,12 +102,22 @@ object DatabaseHelper {
         val db = getDatabase(context)
 
         val countQuery = if (themeId != null) {
-            "SELECT COUNT(*) FROM sets WHERE theme_id = ?"
+            """
+        SELECT COUNT(*)
+        FROM sets
+        WHERE theme_id = ?
+           OR theme_id IN (
+               SELECT id
+               FROM sets_themes
+               WHERE parent_id = ?
+           )
+        """.trimIndent()
         } else {
             "SELECT COUNT(*) FROM sets"
         }
+
         val countCursor = if (themeId != null) {
-            db.rawQuery(countQuery, arrayOf(themeId.toString()))
+            db.rawQuery(countQuery, arrayOf(themeId.toString(), themeId.toString()))
         } else {
             db.rawQuery(countQuery, null)
         }
@@ -116,15 +126,23 @@ object DatabaseHelper {
         countCursor.close()
 
         val selectQuery = if (themeId != null) {
-            "SELECT set_num, name, year, theme_id, num_parts, set_img_url, set_url " +
-                    "FROM sets WHERE theme_id = ? LIMIT ? OFFSET ?"
+            """
+        SELECT set_num, name, year, theme_id, num_parts, set_img_url, set_url
+        FROM sets
+        WHERE theme_id = ?
+           OR theme_id IN (
+               SELECT id
+               FROM sets_themes
+               WHERE parent_id = ?
+           )
+        LIMIT ? OFFSET ?
+        """.trimIndent()
         } else {
-            "SELECT set_num, name, year, theme_id, num_parts, set_img_url, set_url " +
-                    "FROM sets LIMIT ? OFFSET ?"
+            "SELECT set_num, name, year, theme_id, num_parts, set_img_url, set_url LIMIT ? OFFSET ?"
         }
 
         val cursor = if (themeId != null) {
-            db.rawQuery(selectQuery, arrayOf(themeId.toString(), limit.toString(), offset.toString()))
+            db.rawQuery(selectQuery, arrayOf(themeId.toString(), themeId.toString(), limit.toString(), offset.toString()))
         } else {
             db.rawQuery(selectQuery, arrayOf(limit.toString(), offset.toString()))
         }
