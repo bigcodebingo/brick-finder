@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.ui.screens.sets.components.SetsTopBar
 import com.bigbingo.brickfinder.ui.screens.sets.components.ThemeList
@@ -44,42 +45,53 @@ fun SetsScreen(
         },
         containerColor = Color.White
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(10.dp)
                 .fillMaxSize()
         ) {
-            SearchBar(
-                value = searchQuery,
-                onValueChange = {
-                    searchQuery = it
-                    isDropdownVisible = it.isNotBlank()
-                },
-                onSearch = {
-                    if (searchQuery.isNotBlank()) {
-                        onSearchNavigate(searchQuery)
-                    }
-                }
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            if (isDropdownVisible) {
-                SearchResult(
-                    searchResults = searchResults,
-                    onResultSelected = { selected ->
-                        searchQuery = selected
-                        isDropdownVisible = false
-                    }
-                )
-            }
 
             ThemeList(
                 themes = themeTree,
                 onParentClick = onParentClick,
-                onChildClick = onChildClick
+                onChildClick = onChildClick,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(0f)
             )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+                    .zIndex(1f)
+            ) {
+                SearchBar(
+                    value = searchQuery,
+                    onValueChange = {
+                        searchQuery = it
+                        isDropdownVisible = it.isNotBlank()
+                    },
+                    onSearch = {
+                        if (searchQuery.isNotBlank()) {
+                            onSearchNavigate(searchQuery)
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                if (isDropdownVisible) {
+                    SearchResult(
+                        searchResults = searchResults,
+                        onResultSelected = { selected ->
+                            searchQuery = selected
+                            isDropdownVisible = false
+                        },
+                        modifier = Modifier.zIndex(2f)
+                    )
+                }
+            }
         }
     }
 }
