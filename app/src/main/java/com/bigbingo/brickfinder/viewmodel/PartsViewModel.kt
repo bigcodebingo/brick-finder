@@ -51,7 +51,7 @@ class PartsViewModel : ViewModel() {
         }
     }
 
-    fun fetchPartsPageAsync(categoryId: Int, offset: Int, limit: Int, context: Context) {
+    fun fetchPartsPage(categoryId: Int, offset: Int, limit: Int, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             val (partsList, total) = DatabaseHelper.getPartsPage(context, categoryId, offset, limit)
             withContext(Dispatchers.Main) {

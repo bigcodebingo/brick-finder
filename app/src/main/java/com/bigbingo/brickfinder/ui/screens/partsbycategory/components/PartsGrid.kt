@@ -14,7 +14,6 @@ fun PartsGrid(parts: List<Part>) {
         columns = GridCells.Fixed(5),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        userScrollEnabled = false
     ) {
         items(parts, key = { it.part_num }) { part ->
             PartCard(part)

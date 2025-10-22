@@ -43,7 +43,7 @@ fun SearchResult (
                 fontSize = 13.sp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(6.dp)
+                    .padding(8.dp)
             )
         } else {
             Column(
@@ -62,7 +62,7 @@ fun SearchResult (
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onResultSelected(theme.name) }
-                            .padding(vertical = 2.dp, horizontal = 6.dp)
+                            .padding(vertical = 4.dp, horizontal = 8.dp)
                     )
                 }
             }

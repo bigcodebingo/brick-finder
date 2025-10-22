@@ -33,7 +33,7 @@ fun SetsScreen(
 
     val searchResults = remember(searchQuery) {
         if (searchQuery.isBlank()) emptyList()
-        else viewModel.searchThemes(themes, searchQuery).take(6)
+        else viewModel.searchThemes(themes, searchQuery).take(8)
     }
 
     Scaffold(

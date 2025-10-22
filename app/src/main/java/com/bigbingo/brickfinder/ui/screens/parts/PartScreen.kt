@@ -1,5 +1,8 @@
 package com.bigbingo.brickfinder.ui.screens.parts
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,7 +16,7 @@ import com.bigbingo.brickfinder.ui.screens.parts.components.CategoryGrid
 import com.bigbingo.brickfinder.ui.screens.parts.components.CategoryTopBar
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PartScreen(
     onBack: () -> Unit,

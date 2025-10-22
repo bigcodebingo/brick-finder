@@ -31,7 +31,7 @@ fun PartsByCategoryScreen(
 
     fun loadPage(page: Int) {
         val offset = (page - 1) * pageSize
-        viewModel.fetchPartsPageAsync(categoryId, offset, pageSize, context)
+        viewModel.fetchPartsPage(categoryId, offset, pageSize, context)
         currentPage = page
     }
 

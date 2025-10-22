@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase
 import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.data.PartCategory
 import com.bigbingo.brickfinder.data.SetTheme
+import com.bigbingo.brickfinder.data.Set
+
 
 object DatabaseHelper {
 
@@ -94,5 +96,56 @@ object DatabaseHelper {
         cursor.close()
         db.close()
         return themes.sortedBy { setTheme -> setTheme.name }
+    }
+
+    fun getSetsPage(context: Context, themeId: Int?, offset: Int, limit: Int): Pair<List<Set>, Int> {
+        val db = getDatabase(context)
+
+        val countQuery = if (themeId != null) {
+            "SELECT COUNT(*) FROM sets WHERE theme_id = ?"
+        } else {
+            "SELECT COUNT(*) FROM sets"
+        }
+        val countCursor = if (themeId != null) {
+            db.rawQuery(countQuery, arrayOf(themeId.toString()))
+        } else {
+            db.rawQuery(countQuery, null)
+        }
+        countCursor.moveToFirst()
+        val total = countCursor.getInt(0)
+        countCursor.close()
+
+        val selectQuery = if (themeId != null) {
+            "SELECT set_num, name, year, theme_id, num_parts, set_img_url, set_url " +
+                    "FROM sets WHERE theme_id = ? LIMIT ? OFFSET ?"
+        } else {
+            "SELECT set_num, name, year, theme_id, num_parts, set_img_url, set_url " +
+                    "FROM sets LIMIT ? OFFSET ?"
+        }
+
+        val cursor = if (themeId != null) {
+            db.rawQuery(selectQuery, arrayOf(themeId.toString(), limit.toString(), offset.toString()))
+        } else {
+            db.rawQuery(selectQuery, arrayOf(limit.toString(), offset.toString()))
+        }
+
+        val setsList = mutableListOf<Set>()
+        while (cursor.moveToNext()) {
+            setsList.add(
+                Set(
+                    set_num = cursor.getString(0),
+                    name = cursor.getString(1),
+                    year = cursor.getInt(2),
+                    theme_id = cursor.getString(3),
+                    num_parts = cursor.getString(4),
+                    set_img_url = cursor.getString(5),
+                    set_url = cursor.getString(6)
+                )
+            )
+        }
+
+        cursor.close()
+        db.close()
+        return Pair(setsList, total)
     }
 }
