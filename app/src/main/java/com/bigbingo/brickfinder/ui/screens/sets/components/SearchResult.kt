@@ -25,12 +25,13 @@ import com.bigbingo.brickfinder.data.SetTheme
 fun SearchResult (
     searchResults: List<Pair<SetTheme, String?>>,
     onResultSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
 ){
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(max = 200.dp)
-            .background(Color.White, shape = RoundedCornerShape(12.dp))
+            .background(Color.White.copy(alpha = 0.96f), shape = RoundedCornerShape(12.dp))
             .border(width = 1.dp, color = Color.Gray, shape = RoundedCornerShape(12.dp))
             .padding(top = 4.dp, bottom = 4.dp)
     ) {
