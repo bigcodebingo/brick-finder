@@ -14,6 +14,7 @@ import com.bigbingo.brickfinder.ui.screens.sets.components.ThemeList
 import com.bigbingo.brickfinder.viewmodel.SetsViewModel
 import com.bigbingo.brickfinder.ui.screens.sets.components.SearchBar
 import com.bigbingo.brickfinder.ui.screens.sets.components.SearchResult
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,10 +31,21 @@ fun SetsScreen(
 
     var searchQuery by remember { mutableStateOf("") }
     var isDropdownVisible by remember { mutableStateOf(false) }
+    var selectedThemeId by remember { mutableStateOf<Int?>(null) }
+    var navigateToThemeId by remember { mutableStateOf<Int?>(null) }
+
 
     val searchResults = remember(searchQuery) {
         if (searchQuery.isBlank()) emptyList()
         else viewModel.searchThemes(themes, searchQuery).take(8)
+    }
+
+    LaunchedEffect(navigateToThemeId) {
+        navigateToThemeId?.let { themeId ->
+            delay(200)
+            onSearchNavigate(themeId)
+            navigateToThemeId = null
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -76,13 +88,8 @@ fun SetsScreen(
                         isDropdownVisible = it.isNotBlank()
                     },
                     onSearch = {
-                        val foundTheme = themes.find { theme ->
-                            theme.name.contains(searchQuery, ignoreCase = true) ||
-                                    theme.id.toString().contains(searchQuery)
-                        }
-                        foundTheme?.let { theme ->
-                            onSearchNavigate(theme.id)
-                        }
+                        onSearchNavigate(selectedThemeId!!)
+                        isDropdownVisible = false
                     }
                 )
 
@@ -92,13 +99,23 @@ fun SetsScreen(
                     SearchResult(
                         searchResults = searchResults,
                         onResultSelected = { themeId ->
-                            isDropdownVisible = false
-                            searchQuery = ""
-                            onParentClick(themeId)
+                            val resultPair = searchResults.find { (theme, _) -> theme.id == themeId }
+                            resultPair?.let { (theme, parentName) ->
+                                val displayName = if (parentName != null)
+                                    "${theme.name} ($parentName)" else theme.name
+
+                                searchQuery = displayName
+                                selectedThemeId = theme.id
+                                isDropdownVisible = false
+
+                                navigateToThemeId = theme.id
+
+                            }
                         },
                         modifier = Modifier.zIndex(2f)
                     )
                 }
+
             }
         }
     }

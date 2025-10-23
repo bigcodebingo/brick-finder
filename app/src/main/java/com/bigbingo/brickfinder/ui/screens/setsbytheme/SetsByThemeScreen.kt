@@ -1,11 +1,13 @@
 package com.bigbingo.brickfinder.ui.screens.setsbytheme
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -16,6 +18,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -47,9 +50,9 @@ fun SetsThemeScreen(
     val totalPages = (totalSets + pageSize - 1) / pageSize
     val context = LocalContext.current
 
+    var isLoading by remember { mutableStateOf(true) }
     var totalSetsStable by remember { mutableStateOf(0) }
     var themeName by remember { mutableStateOf("") }
-
 
     fun loadPage(page: Int) {
         viewModel.clearSets()
@@ -58,10 +61,9 @@ fun SetsThemeScreen(
         currentPage = page
     }
 
-    LaunchedEffect(totalSets) {
-        if (totalSets > 0 && totalSetsStable == 0) {
-            totalSetsStable = totalSets
-        }
+    LaunchedEffect(totalSets, sets) {
+        if (totalSets > 0 && totalSetsStable == 0) totalSetsStable = totalSets
+        if (sets.isNotEmpty()) isLoading = false
     }
 
     LaunchedEffect(currentPage) {
@@ -69,8 +71,20 @@ fun SetsThemeScreen(
     }
 
     LaunchedEffect(themeId) {
+        totalSetsStable = 0
+        isLoading = true
         loadPage(1)
         themeName = viewModel.getThemeNameById(context, themeId)
+    }
+
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
     }
 
     Scaffold(
