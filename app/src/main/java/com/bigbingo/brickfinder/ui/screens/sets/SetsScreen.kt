@@ -20,9 +20,9 @@ import com.bigbingo.brickfinder.ui.screens.sets.components.SearchResult
 fun SetsScreen(
     viewModel: SetsViewModel = viewModel(),
     onBack: () -> Unit,
-    onParentClick: (String) -> Unit = {},
-    onChildClick: (String) -> Unit = {},
-    onSearchNavigate: (String) -> Unit = {}
+    onParentClick: (Int) -> Unit = {},
+    onChildClick: (Int) -> Unit = {},
+    onSearchNavigate: (Int) -> Unit = {}
 ) {
     val context = LocalContext.current
     val themes = remember { viewModel.fetchSetThemes(context) }
@@ -36,10 +36,13 @@ fun SetsScreen(
         else viewModel.searchThemes(themes, searchQuery).take(8)
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.clearSets()
+    }
     Scaffold(
         topBar = {
             SetsTopBar(
-                titleText = "Find set themes:",
+                titleText = "Category Tree",
                 onBack = onBack
             )
         },
@@ -73,8 +76,12 @@ fun SetsScreen(
                         isDropdownVisible = it.isNotBlank()
                     },
                     onSearch = {
-                        if (searchQuery.isNotBlank()) {
-                            onSearchNavigate(searchQuery)
+                        val foundTheme = themes.find { theme ->
+                            theme.name.contains(searchQuery, ignoreCase = true) ||
+                                    theme.id.toString().contains(searchQuery)
+                        }
+                        foundTheme?.let { theme ->
+                            onSearchNavigate(theme.id)
                         }
                     }
                 )
@@ -84,9 +91,10 @@ fun SetsScreen(
                 if (isDropdownVisible) {
                     SearchResult(
                         searchResults = searchResults,
-                        onResultSelected = { selected ->
-                            searchQuery = selected
+                        onResultSelected = { themeId ->
                             isDropdownVisible = false
+                            searchQuery = ""
+                            onParentClick(themeId)
                         },
                         modifier = Modifier.zIndex(2f)
                     )

@@ -2,6 +2,7 @@ package com.bigbingo.brickfinder.ui.screens.parts.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -17,7 +18,7 @@ fun CategoryFilters(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start
+        horizontalArrangement = Arrangement.Center
     ) {
         Text(text = "Filter:", fontSize = 13.sp, color = Color.Black)
         Spacer(modifier = Modifier.width(6.dp))

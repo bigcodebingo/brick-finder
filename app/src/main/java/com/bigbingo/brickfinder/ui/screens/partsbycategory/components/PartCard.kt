@@ -33,7 +33,7 @@ fun PartCard(part: Part) {
             .width(150.dp)
             .height(110.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(2.dp),
+        shape = RoundedCornerShape(10.dp),
         border = BorderStroke(1.dp, Color.LightGray)
     ) {
         Column(

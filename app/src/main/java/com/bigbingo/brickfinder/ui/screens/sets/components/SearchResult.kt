@@ -22,11 +22,11 @@ import androidx.compose.ui.unit.sp
 import com.bigbingo.brickfinder.data.SetTheme
 
 @Composable
-fun SearchResult (
+fun SearchResult(
     searchResults: List<Pair<SetTheme, String?>>,
-    onResultSelected: (String) -> Unit,
+    onResultSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
-){
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -61,7 +61,7 @@ fun SearchResult (
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onResultSelected(theme.name) }
+                            .clickable { onResultSelected(theme.id) }
                             .padding(vertical = 4.dp, horizontal = 8.dp)
                     )
                 }

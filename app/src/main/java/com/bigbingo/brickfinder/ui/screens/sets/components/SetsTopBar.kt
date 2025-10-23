@@ -39,10 +39,10 @@ fun SetsTopBar(
 
         expandedHeight = 45.dp,
         colors = TopAppBarColors(
-            containerColor = Color.White,
+            containerColor = Color(color = 0xff506070),
             scrolledContainerColor = Color.White,
-            navigationIconContentColor = Color.Black,
-            titleContentColor = Color.Black,
+            navigationIconContentColor = Color.White,
+            titleContentColor = Color.White,
             actionIconContentColor = Color.Black
         )
     )

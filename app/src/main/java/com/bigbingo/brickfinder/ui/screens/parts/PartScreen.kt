@@ -37,15 +37,17 @@ fun PartScreen(
             )
         },
         modifier = Modifier.padding(0.dp),
-        containerColor = Color.White
+        containerColor = Color(color = 0xffeeeeee)
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(
+                    top = 8.dp,
                     start = 16.dp,
                     end = 16.dp,
+                    bottom = 16.dp
                 )
         ) {
             val selectedFilter by viewModel.selectedFilter.collectAsState()
