@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +29,8 @@ fun PartsByCategoryScreen(
     val totalItems by viewModel.totalParts.collectAsState()
     val totalPages = (totalItems + pageSize - 1) / pageSize
     val context = LocalContext.current
+    var isLoading by remember { mutableStateOf(true) }
+
 
     fun loadPage(page: Int) {
         val offset = (page - 1) * pageSize
@@ -37,6 +40,22 @@ fun PartsByCategoryScreen(
 
     LaunchedEffect(categoryId) {
         loadPage(1)
+    }
+
+    LaunchedEffect(parts) {
+        if (parts.isNotEmpty()) {
+            isLoading = false
+        }
+    }
+
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
     }
 
     Scaffold(
