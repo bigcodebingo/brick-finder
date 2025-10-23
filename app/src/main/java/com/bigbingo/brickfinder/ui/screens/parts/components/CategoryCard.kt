@@ -35,8 +35,8 @@ fun CategoryCard(category: PartCategory, onClick: () -> Unit) {
             .height(160.dp)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(2.dp),
-        border = BorderStroke(1.dp, Color.LightGray)
+        shape = RoundedCornerShape(10.dp),
+        border = BorderStroke(1.3.dp, Color.LightGray)
     ) {
         Column(
             modifier = Modifier

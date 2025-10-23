@@ -21,6 +21,7 @@ fun CategoryGrid(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxSize()
+            .padding(top= 8.dp)
 
     ) {
         items(categories) { category ->

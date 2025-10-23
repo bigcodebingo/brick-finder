@@ -1,4 +1,4 @@
-package com.bigbingo.brickfinder.ui.screens.partsbycategory.components
+package com.bigbingo.brickfinder.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,7 +18,8 @@ import androidx.compose.ui.unit.sp
 fun PaginationBar(
     currentPage: Int,
     totalPages: Int,
-    onPageChange: (Int) -> Unit
+    onPageChange: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val maxWindow = 6
     val start = when {
@@ -28,16 +29,16 @@ fun PaginationBar(
     }
     val end = if (totalPages < maxWindow) totalPages else (start + maxWindow - 1)
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start
-    ) {
+    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
         Box(
             modifier = Modifier
                 .width(70.dp)
                 .height(25.dp)
                 .border(1.dp, Color.Black, RoundedCornerShape(4.dp))
-                .background(Color.White, RoundedCornerShape(4.dp))
+                .background(
+                    color = if (currentPage > 1) Color.White else Color(0xffdcddd9),
+                    shape = RoundedCornerShape(4.dp)
+                )
                 .clickable(enabled = currentPage > 1) { onPageChange(currentPage - 1) },
             contentAlignment = Alignment.Center
         ) {
@@ -58,7 +59,7 @@ fun PaginationBar(
                     .height(25.dp)
                     .border(1.dp, Color.Black, RoundedCornerShape(4.dp))
                     .background(
-                        if (i == currentPage) Color(0xffdcddd9) else Color.Transparent,
+                        if (i == currentPage) Color(color = 0xFF0788CA) else Color.White,
                         RoundedCornerShape(4.dp)
                     )
                     .clickable(enabled = i != currentPage) { onPageChange(i) },
@@ -66,7 +67,7 @@ fun PaginationBar(
             ) {
                 Text(
                     "$i",
-                    color = if (i == currentPage) Color.Black else Color(0xFF0788CA),
+                    color = if (i == currentPage) Color.White else Color(0xFF0788CA),
                     fontSize = 12.sp
                 )
             }
@@ -79,7 +80,10 @@ fun PaginationBar(
                 .width(70.dp)
                 .height(25.dp)
                 .border(1.dp, Color.Black, RoundedCornerShape(4.dp))
-                .background(Color.White, RoundedCornerShape(4.dp))
+                .background(
+                    color = if (currentPage < totalPages) Color.White else Color(0xffdcddd9),
+                    shape = RoundedCornerShape(4.dp)
+                )
                 .clickable(enabled = currentPage < totalPages) { onPageChange(currentPage + 1) },
             contentAlignment = Alignment.Center
         ) {

@@ -10,7 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
-import com.bigbingo.brickfinder.ui.screens.partsbycategory.components.PaginationBar
+import com.bigbingo.brickfinder.ui.screens.PaginationBar
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.components.PartsGrid
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.components.PartsTopAppBar
 
@@ -49,8 +49,13 @@ fun PartsByCategoryScreen(
                 onBack = onBack
             )
         },
-        modifier = modifier,
-        containerColor = Color.White
+        bottomBar = {
+            PaginationBar(
+                currentPage = currentPage, totalPages = totalPages, onPageChange = { page -> loadPage(page) },
+                modifier = Modifier.padding(bottom = 34.dp)
+            )
+        },
+        containerColor = Color(0xffeeeeee)
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -58,9 +63,8 @@ fun PartsByCategoryScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            PaginationBar(currentPage, totalPages) { page -> loadPage(page) }
-            Spacer(modifier = Modifier.height(6.dp))
             PartsGrid(parts)
+            Spacer(modifier = Modifier.height(6.dp))
         }
     }
 }

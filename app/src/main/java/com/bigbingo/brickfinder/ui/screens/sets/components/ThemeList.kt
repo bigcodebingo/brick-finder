@@ -22,8 +22,8 @@ import com.bigbingo.brickfinder.viewmodel.ThemeNode
 @Composable
 fun ThemeList(
     themes: List<ThemeNode>,
-    onParentClick: (String) -> Unit = {},
-    onChildClick: (String) -> Unit = {},
+    onParentClick: (Int) -> Unit = {},
+    onChildClick: (Int) -> Unit = {},
     modifier: Modifier = Modifier
 
     ) {
@@ -41,7 +41,7 @@ fun ThemeList(
                 start = 8.dp,
                 top = 70.dp,
                 end = 8.dp,
-                bottom = 8.dp),
+                bottom = 16.dp),
     ) {
         item {
             Row(
@@ -75,8 +75,8 @@ fun ThemeList(
 @Composable
 fun ThemeItem(
     node: ThemeNode,
-    onParentClick: (String) -> Unit = {},
-    onChildClick: (String) -> Unit = {}
+    onParentClick: (Int) -> Unit = {},
+    onChildClick: (Int) -> Unit = {}
     ) {
     Column(modifier = Modifier.padding(start = 6.dp, top = 5.dp)) {
         Text(
@@ -88,7 +88,7 @@ fun ThemeItem(
             overflow = TextOverflow.Ellipsis,
             color = Color(0xff0788CA),
             modifier = Modifier.clickable {
-                onParentClick(node.theme.name)
+                onParentClick(node.theme.id)
             }
         )
         if (node.children.isNotEmpty()) {
@@ -105,7 +105,7 @@ fun ThemeItem(
                         overflow = TextOverflow.Ellipsis,
                         color = Color(0xff0788CA),
                         modifier = Modifier.clickable {
-                            onChildClick(child.theme.name)
+                            onChildClick(child.theme.id)
                         }
                     )
                 }

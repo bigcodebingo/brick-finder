@@ -149,6 +149,8 @@ object DatabaseHelper {
 
         val setsList = mutableListOf<Set>()
         while (cursor.moveToNext()) {
+            val set_img_url = cursor.getString(5)
+                ?: "https://cdn.rebrickable.com/media/thumbs/nil.png/85x85p.png?1662040927.7130826"
             setsList.add(
                 Set(
                     set_num = cursor.getString(0),
@@ -156,7 +158,7 @@ object DatabaseHelper {
                     year = cursor.getInt(2),
                     theme_id = cursor.getString(3),
                     num_parts = cursor.getString(4),
-                    set_img_url = cursor.getString(5),
+                    set_img_url = set_img_url,
                     set_url = cursor.getString(6)
                 )
             )
