@@ -23,6 +23,7 @@ class PartsViewModel : ViewModel() {
     val totalParts: StateFlow<Int> = _totalParts
     private val _selectedFilter = MutableStateFlow("All")
     val selectedFilter: StateFlow<String> = _selectedFilter
+    private val _isLoading = MutableStateFlow(false)
 
     fun clearParts() {
         _parts.value = emptyList()
@@ -53,11 +54,13 @@ class PartsViewModel : ViewModel() {
 
     fun fetchPartsPage(categoryId: Int, offset: Int, limit: Int, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.value = true
             val (partsList, total) = DatabaseHelper.getPartsPage(context, categoryId, offset, limit)
             withContext(Dispatchers.Main) {
                 _parts.value = partsList
                 _totalParts.value = total
             }
+            _isLoading.value = false
         }
     }
 }
