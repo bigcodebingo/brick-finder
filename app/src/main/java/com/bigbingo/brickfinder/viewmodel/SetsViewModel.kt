@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import com.bigbingo.brickfinder.data.Set
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -25,6 +26,9 @@ class SetsViewModel : ViewModel() {
     private val _totalSets = MutableStateFlow(0)
     val totalSets: StateFlow<Int> = _totalSets
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     fun clearSets() {
         _sets.value = emptyList()
         _totalSets.value = 0
@@ -37,11 +41,13 @@ class SetsViewModel : ViewModel() {
 
     fun fetchSetsPage(context: Context, themeId: Int?, offset: Int, limit: Int) {
         viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.value = true
             val (setsList, total) = DatabaseHelper.getSetsPage(context, themeId, offset, limit)
             withContext(Dispatchers.Main) {
                 _sets.value = setsList
                 _totalSets.value = total
             }
+            _isLoading.value = false
         }
     }
 

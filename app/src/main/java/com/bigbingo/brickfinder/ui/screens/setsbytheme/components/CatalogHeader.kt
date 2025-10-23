@@ -26,12 +26,12 @@ fun ColumnHeader() {
         modifier = Modifier
             .background(Color(0xFFc8d3db))
             .fillMaxWidth()
-            .height(33.dp) // ← добавить фиксированную высоту
+            .height(30.dp)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize() // ← использовать fillMaxSize вместо padding
-                .padding(horizontal = 6.dp), // ← только горизонтальные отступы
+                .fillMaxSize()
+                .padding(horizontal = 6.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
