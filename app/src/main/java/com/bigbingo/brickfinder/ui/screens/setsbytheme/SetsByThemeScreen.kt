@@ -1,22 +1,17 @@
 package com.bigbingo.brickfinder.ui.screens.setsbytheme
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -41,7 +36,6 @@ fun SetsThemeScreen(
     viewModel: SetsViewModel = viewModel(),
     onSetClick: (String) -> Unit
 ) {
-    val listState = rememberLazyListState()
     val pageSize = 25
     val currentPage by viewModel.currentPage.collectAsState()
     val sets by viewModel.sets.collectAsState()
@@ -52,6 +46,17 @@ fun SetsThemeScreen(
     val isFirstLoad = remember { mutableStateOf(true) }
     var themeName by remember { mutableStateOf("") }
 
+    val listState = remember(currentPage) {
+        androidx.compose.foundation.lazy.LazyListState(
+            firstVisibleItemIndex = 0,
+            firstVisibleItemScrollOffset = 0
+        )
+
+    }
+
+    LaunchedEffect(currentPage) {
+        viewModel.fetchSetsPage(themeId, currentPage, pageSize, context)
+    }
 
     LaunchedEffect(Unit) {
         if (sets.isEmpty()) {
@@ -65,6 +70,8 @@ fun SetsThemeScreen(
             isFirstLoad.value = false
         }
     }
+
+
 
     if (isFirstLoad.value && sets.isEmpty()) {
         LoadingScreen()
@@ -87,7 +94,7 @@ fun SetsThemeScreen(
                     PaginationBar(
                         currentPage = currentPage,
                         totalPages = totalPages,
-                        onPageChange = { page -> viewModel.fetchSetsPage(themeId,page,pageSize,context) },
+                        onPageChange = { page -> viewModel.setCurrentPage(page) },
                         modifier = Modifier.padding(bottom = 36.55.dp)
                     )
                 }
@@ -107,7 +114,7 @@ fun SetsThemeScreen(
                     currentPage = currentPage,
                     totalPages = totalPages,
                     onSetClick = onSetClick,
-                    onPageChange = { page -> viewModel.fetchSetsPage(themeId,page,pageSize,context) },
+                    onPageChange = { page -> viewModel.setCurrentPage(page) },
                     modifier = Modifier.weight(1f).padding(top = 6.dp)
                 )
             }
