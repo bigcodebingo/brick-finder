@@ -23,10 +23,17 @@ class PartsViewModel : ViewModel() {
     val totalParts: StateFlow<Int> = _totalParts
     private val _selectedFilter = MutableStateFlow("All")
     val selectedFilter: StateFlow<String> = _selectedFilter
-    private val _isLoading = MutableStateFlow(false)
+
+    private val _currentPage = MutableStateFlow(1)
+    val currentPage: StateFlow<Int> = _currentPage
 
     fun clearParts() {
         _parts.value = emptyList()
+        _totalParts.value = 0
+    }
+
+    fun resetCurrentPage() {
+        _currentPage.value = 1
     }
 
     fun filterCategories(filter: String) {
@@ -52,15 +59,15 @@ class PartsViewModel : ViewModel() {
         }
     }
 
-    fun fetchPartsPage(categoryId: Int, offset: Int, limit: Int, context: Context) {
+    fun fetchPartsPage(categoryId: Int, page: Int, pageSize: Int, context: Context) {
+        val offset = (page - 1) * pageSize
         viewModelScope.launch(Dispatchers.IO) {
-            _isLoading.value = true
-            val (partsList, total) = DatabaseHelper.getPartsPage(context, categoryId, offset, limit)
+            val (partsList, total) = DatabaseHelper.getPartsPage(context, categoryId, offset, pageSize)
             withContext(Dispatchers.Main) {
                 _parts.value = partsList
                 _totalParts.value = total
+                _currentPage.value = page
             }
-            _isLoading.value = false
         }
     }
 }

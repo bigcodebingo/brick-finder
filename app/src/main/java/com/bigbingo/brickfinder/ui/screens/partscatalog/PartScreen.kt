@@ -1,4 +1,4 @@
-package com.bigbingo.brickfinder.ui.screens.parts
+package com.bigbingo.brickfinder.ui.screens.partscatalog
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
@@ -9,9 +9,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.bigbingo.brickfinder.ui.screens.parts.components.CategoryFilters
-import com.bigbingo.brickfinder.ui.screens.parts.components.CategoryGrid
-import com.bigbingo.brickfinder.ui.screens.parts.components.CategoryTopBar
+import com.bigbingo.brickfinder.ui.screens.partscatalog.components.CategoryFilters
+import com.bigbingo.brickfinder.ui.screens.partscatalog.components.CategoryGrid
+import com.bigbingo.brickfinder.ui.screens.partscatalog.components.CategoryTopBar
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -26,6 +26,7 @@ fun PartScreen(
 
     LaunchedEffect(Unit) {
         viewModel.clearParts()
+        viewModel.resetCurrentPage()
         viewModel.fetchCategoriesFromDb(context)
     }
 

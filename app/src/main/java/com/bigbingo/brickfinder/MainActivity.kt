@@ -20,8 +20,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.PartsByCategoryScreen
 import com.bigbingo.brickfinder.ui.screens.home.HomeScreen
-import com.bigbingo.brickfinder.ui.screens.parts.PartScreen
-import com.bigbingo.brickfinder.ui.screens.sets.SetsScreen
+import com.bigbingo.brickfinder.ui.screens.partinfo.PartInfoScreen
+import com.bigbingo.brickfinder.ui.screens.partscatalog.PartScreen
+import com.bigbingo.brickfinder.ui.screens.setinfo.SetInfoScreen
+import com.bigbingo.brickfinder.ui.screens.setscatalog.SetsScreen
 import com.bigbingo.brickfinder.ui.screens.setsbytheme.SetsThemeScreen
 import com.bigbingo.brickfinder.ui.theme.BrickFinderTheme
 
@@ -42,6 +44,9 @@ fun MainContent() {
     var selectedIndex by remember { mutableIntStateOf(1) }
     var selectedCategoryId by remember { mutableStateOf<Int?>(null) }
     var selectedThemeId by remember { mutableStateOf<Int?>(null) }
+    var selectedPartNum by remember { mutableStateOf("") }
+    var selectedSetNum by remember { mutableStateOf("") }
+
 
     val showBottomBar = selectedIndex in listOf(0, 1, 2)
 
@@ -69,7 +74,11 @@ fun MainContent() {
             )
             4 -> PartsByCategoryScreen(
                 categoryId = selectedCategoryId ?: 0,
-                onBack = { selectedIndex = 3 }
+                onBack = { selectedIndex = 3 },
+                onPartClick = { partNum ->
+                    selectedPartNum = partNum
+                    selectedIndex = 7
+                }
             )
             5 -> SetsScreen(
                 onBack = { selectedIndex = 1 },
@@ -88,7 +97,19 @@ fun MainContent() {
             )
             6 -> SetsThemeScreen(
                 onBack = { selectedIndex = 5 },
-                themeId = selectedThemeId ?: 0
+                themeId = selectedThemeId ?: 0,
+                onSetClick = { setNum ->
+                    selectedSetNum = setNum
+                    selectedIndex = 8
+                }
+            )
+            7 -> PartInfoScreen(
+                partNum = selectedPartNum,
+                onBack = { selectedIndex = 4 }
+            )
+            8 -> SetInfoScreen(
+                setNum = selectedSetNum,
+                onBack = { selectedIndex = 6 }
             )
         }
     }

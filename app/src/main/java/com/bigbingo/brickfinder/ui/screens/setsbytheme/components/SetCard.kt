@@ -1,5 +1,6 @@
 package com.bigbingo.brickfinder.ui.screens.setsbytheme.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -17,11 +18,15 @@ import com.bigbingo.brickfinder.data.Set
 
 @Composable
 
-fun SetCard(set: Set, backgroundColor: Color) {
+fun SetCard(
+    set: Set,
+    backgroundColor: Color,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(70.dp),
+            .height(68.dp),
         shape = RoundedCornerShape(0.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
@@ -49,6 +54,7 @@ fun SetCard(set: Set, backgroundColor: Color) {
                     fontSize = 11.sp,
                     lineHeight = 14.sp,
                     maxLines = 1,
+                    modifier = Modifier.clickable { onClick() }
                 )
             }
             Spacer(modifier = Modifier.width(30.dp))

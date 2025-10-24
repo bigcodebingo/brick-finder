@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -14,6 +13,7 @@ import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 import com.bigbingo.brickfinder.ui.screens.PaginationBar
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.components.PartsGrid
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.components.PartsTopAppBar
+import com.bigbingo.brickfinder.ui.screens.LoadingScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,69 +21,62 @@ fun PartsByCategoryScreen(
     categoryId: Int,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: PartsViewModel = viewModel()
+    viewModel: PartsViewModel = viewModel(),
+    onPartClick: (String) -> Unit
 ) {
     val pageSize = 25
-    var currentPage by remember { mutableIntStateOf(1) }
+    val currentPage by viewModel.currentPage.collectAsState()
     val parts by viewModel.parts.collectAsState()
     val totalItems by viewModel.totalParts.collectAsState()
     val totalPages = (totalItems + pageSize - 1) / pageSize
     val context = LocalContext.current
-    var isLoading by remember { mutableStateOf(true) }
 
+    val isFirstLoad = remember { mutableStateOf(true) }
 
-    fun loadPage(page: Int) {
-        val offset = (page - 1) * pageSize
-        viewModel.fetchPartsPage(categoryId, offset, pageSize, context)
-        currentPage = page
-    }
-
-    LaunchedEffect(categoryId) {
-        loadPage(1)
+    LaunchedEffect(Unit) {
+        if (parts.isEmpty()) {
+            viewModel.fetchPartsPage(categoryId, currentPage, pageSize, context)
+        }
     }
 
     LaunchedEffect(parts) {
         if (parts.isNotEmpty()) {
-            isLoading = false
+            isFirstLoad.value = false
         }
     }
 
-    if (isLoading) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-        return
-    }
-
-    Scaffold(
-        topBar = {
-            PartsTopAppBar(
-                totalItems = totalItems,
-                currentPage = currentPage,
-                totalPages = totalPages,
-                pageSize = pageSize,
-                onBack = onBack
-            )
-        },
-        bottomBar = {
-            PaginationBar(
-                currentPage = currentPage, totalPages = totalPages, onPageChange = { page -> loadPage(page) },
-                modifier = Modifier.padding(bottom = 34.dp)
-            )
-        },
-        containerColor = Color(0xffeeeeee)
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            PartsGrid(parts)
-            Spacer(modifier = Modifier.height(6.dp))
+    if (isFirstLoad.value && parts.isEmpty()) {
+        LoadingScreen()
+    } else {
+        Scaffold(
+            topBar = {
+                PartsTopAppBar(
+                    totalItems = totalItems,
+                    currentPage = currentPage,
+                    totalPages = totalPages,
+                    pageSize = pageSize,
+                    onBack = onBack
+                )
+            },
+            bottomBar = {
+                PaginationBar(
+                    currentPage = currentPage,
+                    totalPages = totalPages,
+                    onPageChange = { page -> viewModel.fetchPartsPage(categoryId, page, pageSize, context) },
+                    modifier = Modifier.padding(bottom = 34.dp)
+                )
+            },
+            containerColor = Color(0xffeeeeee)
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                PartsGrid(parts, onPartClick = onPartClick)
+                Spacer(modifier = Modifier.height(6.dp))
+            }
         }
     }
 }

@@ -80,7 +80,7 @@ object DatabaseHelper {
 
     fun getAllSetThemes(context: Context): List<SetTheme> {
         val db = getDatabase(context)
-        val cursor = db.rawQuery("SELECT id, name, parent_id FROM sets_themes", null)
+        val cursor = db.rawQuery("SELECT id, name, parent_id FROM sets_themes ORDER BY name", null)
         val themes = mutableListOf<SetTheme>()
         if (cursor.moveToFirst()) {
             do {
@@ -95,7 +95,7 @@ object DatabaseHelper {
         }
         cursor.close()
         db.close()
-        return themes.sortedBy { setTheme -> setTheme.name }
+        return themes
     }
 
     fun getSetsPage(context: Context, themeId: Int?, offset: Int, limit: Int): Pair<List<Set>, Int> {
@@ -135,10 +135,12 @@ object DatabaseHelper {
                FROM sets_themes
                WHERE parent_id = ?
            )
+           ORDER BY year ASC, name ASC
         LIMIT ? OFFSET ?
         """.trimIndent()
         } else {
-            "SELECT set_num, name, year, theme_id, num_parts, set_img_url, set_url LIMIT ? OFFSET ?"
+            "SELECT set_num, name, year, theme_id, num_parts, set_img_url, set_url FROM sets ORDER BY year ASC, " +
+                    "name ASC LIMIT ? OFFSET ?"
         }
 
         val cursor = if (themeId != null) {

@@ -1,4 +1,4 @@
-package com.bigbingo.brickfinder.ui.screens.parts.components
+package com.bigbingo.brickfinder.ui.screens.partscatalog.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.BorderStroke
