@@ -11,7 +11,10 @@ import androidx.compose.ui.unit.dp
 import com.bigbingo.brickfinder.data.Part
 
 @Composable
-fun PartsGrid(parts: List<Part>) {
+fun PartsGrid(
+    parts: List<Part>,
+    onPartClick: (String) -> Unit
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(5),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -19,7 +22,7 @@ fun PartsGrid(parts: List<Part>) {
         modifier = Modifier .padding(top = 5.dp)
     ) {
         items(parts, key = { it.part_num }) { part ->
-            PartCard(part)
+            PartCard(part){ onPartClick(part.part_num) }
         }
     }
 }

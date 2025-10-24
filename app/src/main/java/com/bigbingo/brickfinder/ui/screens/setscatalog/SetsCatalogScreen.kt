@@ -1,4 +1,4 @@
-package com.bigbingo.brickfinder.ui.screens.sets
+package com.bigbingo.brickfinder.ui.screens.setscatalog
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -9,11 +9,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.bigbingo.brickfinder.ui.screens.sets.components.SetsTopBar
-import com.bigbingo.brickfinder.ui.screens.sets.components.ThemeList
+import com.bigbingo.brickfinder.ui.screens.setscatalog.components.SetsTopBar
+import com.bigbingo.brickfinder.ui.screens.setscatalog.components.ThemeList
 import com.bigbingo.brickfinder.viewmodel.SetsViewModel
-import com.bigbingo.brickfinder.ui.screens.sets.components.SearchBar
-import com.bigbingo.brickfinder.ui.screens.sets.components.SearchResult
+import com.bigbingo.brickfinder.ui.screens.setscatalog.components.SearchBar
+import com.bigbingo.brickfinder.ui.screens.setscatalog.components.SearchResult
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +49,7 @@ fun SetsScreen(
     }
 
     LaunchedEffect(Unit) {
+        viewModel.resetCurrentPage()
         viewModel.clearSets()
     }
     Scaffold(

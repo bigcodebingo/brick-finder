@@ -1,4 +1,4 @@
-package com.bigbingo.brickfinder.ui.screens.parts.components
+package com.bigbingo.brickfinder.ui.screens.partscatalog.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack

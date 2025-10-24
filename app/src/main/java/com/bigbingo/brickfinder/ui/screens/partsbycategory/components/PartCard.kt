@@ -2,6 +2,7 @@ package com.bigbingo.brickfinder.ui.screens.partsbycategory.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -27,11 +28,15 @@ import androidx.compose.ui.text.style.TextAlign
 import com.bigbingo.brickfinder.data.Part
 
 @Composable
-fun PartCard(part: Part) {
+fun PartCard(
+    part: Part,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .width(150.dp)
-            .height(110.dp),
+            .height(110.dp)
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = Color.White),
         shape = RoundedCornerShape(10.dp),
         border = BorderStroke(1.dp, Color.LightGray)

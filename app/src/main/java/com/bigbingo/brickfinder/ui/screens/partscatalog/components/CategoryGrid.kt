@@ -1,4 +1,4 @@
-package com.bigbingo.brickfinder.ui.screens.parts.components
+package com.bigbingo.brickfinder.ui.screens.partscatalog.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells

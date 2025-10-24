@@ -22,16 +22,16 @@ class SetsViewModel : ViewModel() {
 
     private val _sets = MutableStateFlow<List<Set>>(emptyList())
     val sets: StateFlow<List<Set>> = _sets
-
     private val _totalSets = MutableStateFlow(0)
     val totalSets: StateFlow<Int> = _totalSets
-
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
+    private val _currentPage = MutableStateFlow(1)
+    val currentPage: StateFlow<Int> = _currentPage
     fun clearSets() {
         _sets.value = emptyList()
-        _totalSets.value = 0
+    }
+
+    fun resetCurrentPage() {
+        _currentPage.value = 1
     }
 
     fun getThemeNameById(context: Context, themeId: Int): String {
@@ -39,15 +39,15 @@ class SetsViewModel : ViewModel() {
         return themes.find { it.id == themeId }?.name ?: "Unknown Theme"
     }
 
-    fun fetchSetsPage(context: Context, themeId: Int?, offset: Int, limit: Int) {
+    fun fetchSetsPage(themeId: Int?, page: Int, pageSize: Int, context: Context) {
+        val offset = (page - 1) * pageSize
         viewModelScope.launch(Dispatchers.IO) {
-            _isLoading.value = true
-            val (setsList, total) = DatabaseHelper.getSetsPage(context, themeId, offset, limit)
+            val (setsList, total) = DatabaseHelper.getSetsPage(context, themeId, offset, pageSize)
             withContext(Dispatchers.Main) {
                 _sets.value = setsList
                 _totalSets.value = total
+                _currentPage.value = page
             }
-            _isLoading.value = false
         }
     }
 

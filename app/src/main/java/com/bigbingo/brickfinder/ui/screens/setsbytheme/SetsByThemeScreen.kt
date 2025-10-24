@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,10 +26,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.bigbingo.brickfinder.ui.screens.setsbytheme.components.SetCard
+import com.bigbingo.brickfinder.ui.screens.LoadingScreen
 import com.bigbingo.brickfinder.ui.screens.setsbytheme.components.ThemeTopBar
 import com.bigbingo.brickfinder.ui.screens.PaginationBar
-import com.bigbingo.brickfinder.ui.screens.setsbytheme.components.ColumnHeader
+import com.bigbingo.brickfinder.ui.screens.setsbytheme.components.SetsList
 import com.bigbingo.brickfinder.viewmodel.SetsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,110 +38,81 @@ fun SetsThemeScreen(
     themeId: Int,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: SetsViewModel = viewModel()
+    viewModel: SetsViewModel = viewModel(),
+    onSetClick: (String) -> Unit
 ) {
     val listState = rememberLazyListState()
     val pageSize = 25
-    var currentPage by remember { mutableIntStateOf(1) }
+    val currentPage by viewModel.currentPage.collectAsState()
     val sets by viewModel.sets.collectAsState()
     val totalSets by viewModel.totalSets.collectAsState()
     val totalPages = (totalSets + pageSize - 1) / pageSize
     val context = LocalContext.current
 
-    var isLoading by remember { mutableStateOf(true) }
-    var totalSetsStable by remember { mutableStateOf(0) }
+    val isFirstLoad = remember { mutableStateOf(true) }
     var themeName by remember { mutableStateOf("") }
 
-    fun loadPage(page: Int) {
-        viewModel.clearSets()
-        val offset = (page - 1) * pageSize
-        viewModel.fetchSetsPage(context, themeId, offset, pageSize)
-        currentPage = page
-    }
 
-    LaunchedEffect(totalSets, sets) {
-        if (totalSets > 0 && totalSetsStable == 0) totalSetsStable = totalSets
-        if (sets.isNotEmpty()) isLoading = false
-    }
-
-    LaunchedEffect(currentPage) {
-        listState.scrollToItem(0)
-    }
-
-    LaunchedEffect(themeId) {
-        totalSetsStable = 0
-        isLoading = true
-        loadPage(1)
+    LaunchedEffect(Unit) {
+        if (sets.isEmpty()) {
+            viewModel.fetchSetsPage(themeId, currentPage, pageSize, context)
+        }
         themeName = viewModel.getThemeNameById(context, themeId)
     }
 
-    if (isLoading) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
+    LaunchedEffect(sets) {
+        if (sets.isNotEmpty()) {
+            isFirstLoad.value = false
         }
-        return
     }
 
-    Scaffold(
-        topBar = {
-            ThemeTopBar(
-                titleText = buildAnnotatedString {
-                    append(themeName)
-                    append(" ")
-                    withStyle(style = SpanStyle(fontSize = 14.sp, color = Color.Gray)) {
-                        append("($totalSetsStable sets)")
-                    }
-                },
-                onBack = onBack
-            )
-        },
-        bottomBar = {
-            if (sets.size<9 && sets.isNotEmpty()) {
-                PaginationBar(
+    if (isFirstLoad.value && sets.isEmpty()) {
+        LoadingScreen()
+    } else{
+        Scaffold(
+            topBar = {
+                ThemeTopBar(
+                    titleText = buildAnnotatedString {
+                        append(themeName)
+                        append(" ")
+                        withStyle(style = SpanStyle(fontSize = 14.sp, color = Color.Gray)) {
+                            append("($totalSets sets)")
+                        }
+                    },
+                    onBack = onBack
+                )
+            },
+            bottomBar = {
+                if (sets.size<9 && sets.isNotEmpty()) {
+                    PaginationBar(
+                        currentPage = currentPage,
+                        totalPages = totalPages,
+                        onPageChange = { page -> viewModel.fetchSetsPage(themeId,page,pageSize,context) },
+                        modifier = Modifier.padding(bottom = 36.55.dp)
+                    )
+                }
+            },
+            modifier = modifier,
+            containerColor = Color(0xffeeeeee)
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                SetsList(
+                    sets = sets,
+                    listState = listState,
                     currentPage = currentPage,
                     totalPages = totalPages,
-                    onPageChange = { page -> loadPage(page) },
-                    modifier = Modifier.padding(bottom = 32.dp)
+                    onSetClick = onSetClick,
+                    onPageChange = { page -> viewModel.fetchSetsPage(themeId,page,pageSize,context) },
+                    modifier = Modifier.weight(1f).padding(top = 6.dp)
                 )
-            }
-        },
-        modifier = modifier,
-        containerColor = Color(0xffeeeeee)
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 12.dp, vertical = 6.dp)
-        ) {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.weight(1f) .padding(top=6.dp)
-            ) {
-                item{
-                    ColumnHeader()
-                }
-                itemsIndexed(sets) { index, set ->
-                    val backgroundColor =
-                        if (index % 2 == 0) Color.White else Color(color = 0xfff1f5f8)
-
-                    SetCard(set = set, backgroundColor = backgroundColor)
-                }
-
-                if (sets.size>=9) {
-                    item {
-                        PaginationBar(
-                            currentPage = currentPage,
-                            totalPages = totalPages,
-                            onPageChange = { page -> loadPage(page) },
-                            modifier = Modifier.padding(top = 16.dp,bottom = 16.dp)
-                        )
-                    }
-                }
             }
         }
     }
 }
+
+
