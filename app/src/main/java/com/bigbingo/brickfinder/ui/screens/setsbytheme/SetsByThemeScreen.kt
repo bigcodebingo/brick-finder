@@ -1,8 +1,12 @@
 package com.bigbingo.brickfinder.ui.screens.setsbytheme
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -27,12 +31,12 @@ import com.bigbingo.brickfinder.ui.screens.PaginationBar
 import com.bigbingo.brickfinder.ui.screens.setsbytheme.components.SetsList
 import com.bigbingo.brickfinder.viewmodel.SetsViewModel
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetsThemeScreen(
     themeId: Int,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier,
     viewModel: SetsViewModel = viewModel(),
     onSetClick: (String) -> Unit
 ) {
@@ -41,18 +45,12 @@ fun SetsThemeScreen(
     val sets by viewModel.sets.collectAsState()
     val totalSets by viewModel.totalSets.collectAsState()
     val totalPages = (totalSets + pageSize - 1) / pageSize
-    val context = LocalContext.current
 
     val isFirstLoad = remember { mutableStateOf(true) }
     var themeName by remember { mutableStateOf("") }
+    val listState = rememberLazyListState()
 
-    val listState = remember(currentPage) {
-        androidx.compose.foundation.lazy.LazyListState(
-            firstVisibleItemIndex = 0,
-            firstVisibleItemScrollOffset = 0
-        )
-
-    }
+    val context = LocalContext.current
 
     LaunchedEffect(currentPage) {
         viewModel.fetchSetsPage(themeId, currentPage, pageSize, context)
@@ -71,11 +69,9 @@ fun SetsThemeScreen(
         }
     }
 
-
-
     if (isFirstLoad.value && sets.isEmpty()) {
         LoadingScreen()
-    } else{
+    } else {
         Scaffold(
             topBar = {
                 ThemeTopBar(
@@ -89,23 +85,11 @@ fun SetsThemeScreen(
                     onBack = onBack
                 )
             },
-            bottomBar = {
-                if (sets.size<9 && sets.isNotEmpty()) {
-                    PaginationBar(
-                        currentPage = currentPage,
-                        totalPages = totalPages,
-                        onPageChange = { page -> viewModel.setCurrentPage(page) },
-                        modifier = Modifier.padding(bottom = 36.55.dp)
-                    )
-                }
-            },
-            modifier = modifier,
             containerColor = Color(0xffeeeeee)
-        ) { innerPadding ->
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 SetsList(
@@ -115,11 +99,24 @@ fun SetsThemeScreen(
                     totalPages = totalPages,
                     onSetClick = onSetClick,
                     onPageChange = { page -> viewModel.setCurrentPage(page) },
-                    modifier = Modifier.weight(1f).padding(top = 6.dp)
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 105.dp)
                 )
+
+                if (sets.size < 9 && sets.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    PaginationBar(
+                        currentPage = currentPage,
+                        totalPages = totalPages,
+                        onPageChange = { page -> viewModel.setCurrentPage(page) },
+                        modifier = Modifier.padding(bottom = 20.dp)
+                    )
+                }
             }
         }
     }
 }
+
 
 

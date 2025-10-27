@@ -43,7 +43,7 @@ fun SetsList(
                     currentPage = currentPage,
                     totalPages = totalPages,
                     onPageChange = onPageChange,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 20.dp)
                 )
             }
         }
