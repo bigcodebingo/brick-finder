@@ -170,4 +170,27 @@ object DatabaseHelper {
         db.close()
         return Pair(setsList, total)
     }
+
+    fun getPartByNum(context: Context, partNum: String): Part? {
+        val db = getDatabase(context)
+        val cursor = db.rawQuery(
+            "SELECT part_num, name, part_cat_id, part_url, part_img_url FROM parts WHERE part_num = ?",
+            arrayOf(partNum)
+        )
+
+        var part: Part? = null
+        if (cursor.moveToFirst()) {
+            part = Part(
+                part_num = cursor.getString(0),
+                name = cursor.getString(1),
+                part_cat_id = cursor.getInt(2),
+                part_url = cursor.getString(3),
+                part_img_url = cursor.getString(4),
+            )
+        }
+
+        cursor.close()
+        db.close()
+        return part
+    }
 }

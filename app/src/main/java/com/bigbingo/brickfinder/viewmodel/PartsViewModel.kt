@@ -5,10 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.data.PartCategory
+import com.bigbingo.brickfinder.data.PartColor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import com.bigbingo.brickfinder.data.db.DatabaseHelper
+import com.bigbingo.brickfinder.data.network.ApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -23,9 +25,11 @@ class PartsViewModel : ViewModel() {
     val totalParts: StateFlow<Int> = _totalParts
     private val _selectedFilter = MutableStateFlow("All")
     val selectedFilter: StateFlow<String> = _selectedFilter
-
     private val _currentPage = MutableStateFlow(1)
     val currentPage: StateFlow<Int> = _currentPage
+    private val _part = MutableStateFlow<Part?>(null)
+    val part: StateFlow<Part?> = _part
+
 
     fun clearParts() {
         _parts.value = emptyList()
@@ -34,6 +38,19 @@ class PartsViewModel : ViewModel() {
 
     fun resetCurrentPage() {
         _currentPage.value = 1
+    }
+
+    fun clearPart() {
+        _part.value = null
+    }
+
+    fun loadPartFromDb(context: Context, partNum: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val p = DatabaseHelper.getPartByNum(context, partNum)
+            withContext(Dispatchers.Main) {
+                _part.value = p
+            }
+        }
     }
 
     fun filterCategories(filter: String) {

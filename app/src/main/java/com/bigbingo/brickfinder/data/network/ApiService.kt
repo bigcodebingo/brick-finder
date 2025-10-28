@@ -1,24 +1,23 @@
 package com.bigbingo.brickfinder.data.network
 
 import com.bigbingo.brickfinder.data.Part
-import com.bigbingo.brickfinder.data.PartCategory
+import com.bigbingo.brickfinder.data.PartColor
 import retrofit2.http.GET
 import retrofit2.http.Header
-import retrofit2.http.Query
 
 interface ApiService {
 
-    @GET("lego/part_categories/")
-    suspend fun getPartCategories(
-        @Header("Authorization") apiKey: String
-    ): ApiResponse<PartCategory>
-
-    @GET("lego/parts/")
-    suspend fun getPartsByCategory(
+    @GET("lego/parts/{part_num}/")
+    suspend fun getPartById(
         @Header("Authorization") apiKey: String,
-        @Query("part_cat_id") categoryId: Int
+        @retrofit2.http.Path("part_num") partNum: String
+    ): Part
 
-    ): ApiResponse<Part>
+    @GET("lego/parts/{part_num}/colors/")
+    suspend fun getPartColors(
+        @Header("Authorization") apiKey: String,
+        @retrofit2.http.Path("part_num") partNum: String
+    ): ApiResponse<PartColor>
 }
 
 data class ApiResponse<T>(
