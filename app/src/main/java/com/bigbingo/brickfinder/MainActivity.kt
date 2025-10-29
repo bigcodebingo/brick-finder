@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.PartsByCategoryScreen
 import com.bigbingo.brickfinder.ui.screens.home.HomeScreen
 import com.bigbingo.brickfinder.ui.screens.inventoryscreen.InventoryScreen
@@ -48,6 +50,7 @@ fun MainContent() {
     var selectedPartNum by remember { mutableStateOf("") }
     var selectedSetNum by remember { mutableStateOf("") }
 
+    var selectedPart by remember { mutableStateOf<Part?>(null) }
 
     val showBottomBar = selectedIndex in listOf(0, 1, 2)
 
@@ -107,16 +110,21 @@ fun MainContent() {
             7 -> PartInfoScreen(
                 partNum = selectedPartNum,
                 onBack = { selectedIndex = 4 },
-                onClickSets = { selectedIndex = 9 }
+                onClickSets = { part ->
+                    selectedPart = part 
+                    selectedIndex = 9
+                }
             )
             8 -> SetInfoScreen(
                 setNum = selectedSetNum,
                 onBack = { selectedIndex = 6 }
             )
-            9 -> InventoryScreen (
-                partNum = selectedPartNum,
-                onBack = { selectedIndex = 7 },
-            )
+            9 -> selectedPart?.let { part ->
+                InventoryScreen(
+                    part = part,
+                    onBack = { selectedIndex = 7 }
+                )
+            }
         }
     }
 }

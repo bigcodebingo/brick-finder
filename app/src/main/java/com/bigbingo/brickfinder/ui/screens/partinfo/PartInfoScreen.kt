@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.ui.screens.LoadingScreen
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 import com.bigbingo.brickfinder.data.db.DatabaseHelper
@@ -31,7 +32,7 @@ import com.bigbingo.brickfinder.ui.screens.PartTopBar
 fun PartInfoScreen(
     partNum: String,
     onBack: () -> Unit,
-    onClickSets: () -> Unit,
+    onClickSets: (Part) -> Unit,
     viewModel: PartsViewModel = viewModel(),
 ) {
     val context = LocalContext.current
@@ -163,7 +164,7 @@ fun PartInfoScreen(
                                 start = offset,
                                 end = offset
                             ).firstOrNull()?.let {
-                                onClickSets()
+                                onClickSets(p)
                             }
                         }
                     )
@@ -184,7 +185,7 @@ fun PartInfoScreen(
                         )
                     }
                     if (partColors.size>1) {
-                        ColorList(partColors, onClickSets = onClickSets)
+                        /*ColorList(partColors, onClickSets = onClickSets)*/
                     } else {
                         Box(
                             modifier = Modifier

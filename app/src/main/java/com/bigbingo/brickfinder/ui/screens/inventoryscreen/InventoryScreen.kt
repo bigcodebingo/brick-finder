@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.data.db.DatabaseHelper
 import com.bigbingo.brickfinder.ui.screens.LoadingScreen
 import com.bigbingo.brickfinder.ui.screens.PartTopBar
@@ -30,20 +31,16 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun InventoryScreen(
-    partNum: String,
+    part: Part,
     onBack: () -> Unit,
     viewModel: PartsViewModel = viewModel(),
-
     ) {
-
 
     Scaffold(
         topBar = {
             PartTopBar(
-                titleText = "",
-                onBack = {
-                    onBack()
-                }
+                titleText = part.part_num,
+                onBack = onBack
             )
         }
     ) { innerPadding ->
@@ -58,9 +55,14 @@ fun InventoryScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Information about part: ${partNum ?: "Unknown"}",
+                    text = "Information about part: ${part.part_num}",
                     style = MaterialTheme.typography.headlineSmall,
                     color = Color.DarkGray
+                )
+                Text(
+                    text = "Name: ${part.name}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Black
                 )
             }
         }
