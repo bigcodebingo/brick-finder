@@ -2,11 +2,11 @@ package com.bigbingo.brickfinder.data.db
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.data.PartCategory
 import com.bigbingo.brickfinder.data.SetTheme
 import com.bigbingo.brickfinder.data.Set
-
 
 object DatabaseHelper {
 
@@ -188,9 +188,95 @@ object DatabaseHelper {
                 part_img_url = cursor.getString(4),
             )
         }
-
         cursor.close()
         db.close()
         return part
+    }
+
+    data class ColorCount(
+        val colorId: Int,
+        val count: Int
+    )
+
+    fun getPartInfo(
+        context: Context,
+        partNum: String
+    ): Triple<List<String>, Pair<Int?, Int?>, List<ColorCount>> {
+        val db = getDatabase(context)
+
+        val setNums = mutableListOf<String>()
+        val setsQuery = """
+        SELECT DISTINCT inv.set_num
+        FROM inventory_parts AS ip
+        INNER JOIN inventories AS inv
+            ON ip.inventory_id = inv.id
+        WHERE ip.part_num = ?
+    """.trimIndent()
+
+        val cursorSets = db.rawQuery(setsQuery, arrayOf(partNum))
+        while (cursorSets.moveToNext()) {
+            setNums.add(cursorSets.getString(0))
+        }
+        cursorSets.close()
+
+        var minYear: Int? = null
+        var maxYear: Int? = null
+        if (setNums.isNotEmpty()) {
+            val yearQuery = """
+            SELECT MIN(s.year), MAX(s.year)
+            FROM sets AS s
+            WHERE s.set_num IN (${setNums.joinToString(",") { "'$it'" }})
+        """.trimIndent()
+
+            val cursorYear = db.rawQuery(yearQuery, null)
+            if (cursorYear.moveToFirst()) {
+                if (!cursorYear.isNull(0)) minYear = cursorYear.getInt(0)
+                if (!cursorYear.isNull(1)) maxYear = cursorYear.getInt(1)
+            }
+            cursorYear.close()
+        }
+
+        val colorCounts = mutableListOf<ColorCount>()
+        val colorQuery = """
+        SELECT ip.color_id, COUNT(DISTINCT inv.set_num) AS set_count
+        FROM inventory_parts AS ip
+        INNER JOIN inventories AS inv
+            ON ip.inventory_id = inv.id
+        WHERE ip.part_num = ?
+        GROUP BY ip.color_id
+    """.trimIndent()
+
+        val cursorColors = db.rawQuery(colorQuery, arrayOf(partNum))
+        while (cursorColors.moveToNext()) {
+            val colorId = cursorColors.getInt(0)
+            val count = cursorColors.getInt(1)
+            colorCounts.add(ColorCount(colorId, count))
+        }
+        cursorColors.close()
+
+        db.close()
+        return Triple(setNums, Pair(minYear, maxYear), colorCounts)
+    }
+
+    fun getColorsByIds(context: Context, colorIds: List<Int>): List<PartColor> {
+        if (colorIds.isEmpty()) return emptyList()
+        val db = getDatabase(context)
+        val idsString = colorIds.joinToString(",")
+        val query = "SELECT id, name, rgb, is_trans FROM colors WHERE id IN ($idsString)"
+        val cursor = db.rawQuery(query, null)
+        val colors = mutableListOf<PartColor>()
+        while (cursor.moveToNext()) {
+            colors.add(
+                PartColor(
+                    id = cursor.getInt(0),
+                    name = cursor.getString(1),
+                    rgb = cursor.getString(2),
+                    isTrans = cursor.getInt(3) != 0
+                )
+            )
+        }
+        cursor.close()
+        db.close()
+        return colors
     }
 }

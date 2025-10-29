@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.PartsByCategoryScreen
 import com.bigbingo.brickfinder.ui.screens.home.HomeScreen
+import com.bigbingo.brickfinder.ui.screens.inventoryscreen.InventoryScreen
 import com.bigbingo.brickfinder.ui.screens.partinfo.PartInfoScreen
 import com.bigbingo.brickfinder.ui.screens.partscatalog.PartScreen
 import com.bigbingo.brickfinder.ui.screens.setinfo.SetInfoScreen
@@ -105,11 +106,16 @@ fun MainContent() {
             )
             7 -> PartInfoScreen(
                 partNum = selectedPartNum,
-                onBack = { selectedIndex = 4 }
+                onBack = { selectedIndex = 4 },
+                onClickSets = { selectedIndex = 9 }
             )
             8 -> SetInfoScreen(
                 setNum = selectedSetNum,
                 onBack = { selectedIndex = 6 }
+            )
+            9 -> InventoryScreen (
+                partNum = selectedPartNum,
+                onBack = { selectedIndex = 7 },
             )
         }
     }

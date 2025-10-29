@@ -3,14 +3,13 @@ package com.bigbingo.brickfinder.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.data.PartCategory
-import com.bigbingo.brickfinder.data.PartColor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import com.bigbingo.brickfinder.data.db.DatabaseHelper
-import com.bigbingo.brickfinder.data.network.ApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -29,7 +28,33 @@ class PartsViewModel : ViewModel() {
     val currentPage: StateFlow<Int> = _currentPage
     private val _part = MutableStateFlow<Part?>(null)
     val part: StateFlow<Part?> = _part
+    private val _setNums  = MutableStateFlow<List<String>>(emptyList())
+    val setNums : StateFlow<List<String>> = _setNums
 
+    private val _yearRange = MutableStateFlow<Pair<Int?, Int?>>(null to null)
+    val yearRange: StateFlow<Pair<Int?, Int?>> = _yearRange
+
+    private val _partColors = MutableStateFlow<List<PartColor>>(emptyList())
+    val partColors: StateFlow<List<PartColor>> = _partColors
+
+    fun loadPartInfo(context: Context, partNum: String) {
+        viewModelScope.launch {
+            val (setNums, minMaxYear, colorCounts) = DatabaseHelper.getPartInfo(context, partNum)
+            _setNums.value = setNums
+            _yearRange.value = minMaxYear
+
+            val colorIds = colorCounts.map { it.colorId }
+            val colors = if (colorIds.isNotEmpty()) {
+                DatabaseHelper.getColorsByIds(context, colorIds)
+            } else emptyList()
+
+            val colorsWithCounts = colors.map { color ->
+                val count = colorCounts.find { it.colorId == color.id }?.count ?: 0
+                color.copy(count = count)
+            }
+            _partColors.value = colorsWithCounts
+        }
+    }
 
     fun clearParts() {
         _parts.value = emptyList()

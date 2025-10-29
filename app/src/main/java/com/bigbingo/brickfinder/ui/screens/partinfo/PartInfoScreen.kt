@@ -1,88 +1,80 @@
 package com.bigbingo.brickfinder.ui.screens.partinfo
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.bigbingo.brickfinder.ui.screens.LoadingScreen
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 import com.bigbingo.brickfinder.data.db.DatabaseHelper
+import com.bigbingo.brickfinder.ui.screens.partinfo.components.ColorList
+import com.bigbingo.brickfinder.ui.screens.PartTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PartInfoScreen(
     partNum: String,
     onBack: () -> Unit,
+    onClickSets: () -> Unit,
     viewModel: PartsViewModel = viewModel(),
 ) {
     val context = LocalContext.current
     val part by viewModel.part.collectAsState()
+    val setNums  by viewModel.setNums.collectAsState()
+    val yearRange by viewModel.yearRange.collectAsState()
+    val partColors   by viewModel.partColors.collectAsState()
     val categoryName = remember(part) {
         part?.let { p ->
             DatabaseHelper.getPartCategories(context)
                 .find { it.id == p.part_cat_id }?.name
         }
     }
-    LaunchedEffect(partNum) {
-        viewModel.loadPartFromDb(context, partNum)
+
+    val isFirstLoad = remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        if (part?.part_num != partNum) {
+            viewModel.loadPartFromDb(context, partNum)
+            viewModel.loadPartInfo(context, partNum)
+        }
+    }
+    LaunchedEffect(part) {
+        if (part != null && categoryName != "null") {
+            isFirstLoad.value = false
+        }
     }
 
-    DisposableEffect(Unit) {
-        onDispose { viewModel.clearPart() }
-    }
 
-    if (part == null || categoryName == "null") {
 
-        return
+    if (isFirstLoad.value && part == null) {
+        LoadingScreen()
     }
     else{
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            "$categoryName: ${part?.part_num ?: partNum}",
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 12.sp)
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            viewModel.clearPart()
-                            onBack()
-                        }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                        }
-                    },
-                    expandedHeight = 50.dp,
-                    colors = TopAppBarColors(
-                        containerColor = Color(color = 0xff506070),
-                        scrolledContainerColor = Color.White,
-                        navigationIconContentColor = Color.White,
-                        titleContentColor = Color.White,
-                        actionIconContentColor = Color.Black ) )
+                PartTopBar(
+                    titleText = "$categoryName: ${part?.part_num ?: partNum}",
+                    onBack = {
+                        viewModel.clearPart()
+                        onBack()
+                    }
+                )
             },
             containerColor = Color.White
         ) { innerPadding ->
@@ -111,25 +103,69 @@ fun PartInfoScreen(
                         lineHeight = 18.sp
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    Image(
-                        painter = rememberAsyncImagePainter(p.part_img_url),
-                        contentDescription = "Part image",
+                    AsyncImage(
+                        model = p.part_img_url,
+                        contentDescription = p.name,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp)
-                            .padding(all = 5.dp)
+                            .fillMaxHeight(0.35f)
                             .border(
                                 width = 1.dp,
                                 color = Color(0xFFCCCCCC),
-                                shape = RoundedCornerShape(12.dp)),
-                        contentScale = ContentScale.Fit
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .padding(all = 5.dp),
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-
                     Text(
-                        text = "Item Appears In: ",
+                        text = buildAnnotatedString {
+                            append("Years released: ")
+                            val (minYear, maxYear) = yearRange
+                            if (minYear != null && maxYear != null) {
+                                if (minYear == maxYear) {
+                                    append("$minYear")
+                                } else {
+                                    append("$minYear - $maxYear")
+                                }
+                            } else {
+                                append("N/A")
+                            }
+                        },
                         color = Color.Black,
                         style = MaterialTheme.typography.titleLarge.copy(fontSize = 13.sp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val count = setNums.size
+                    val plural = if (count == 1) "set" else "sets"
+                    val annotatedText = buildAnnotatedString {
+                        append("Item appears in: ")
+                        pushStringAnnotation(tag = "SETS", annotation = "sets_click")
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color(0xFF1565C0),
+                                textDecoration = TextDecoration.Underline
+                            )
+                        ) {
+                            append("$count $plural")
+                        }
+                        pop()
+                    }
+                    ClickableText(
+                        text = annotatedText,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontSize = 13.sp,
+                            color = Color.Black
+                        ),
+                        onClick = { offset ->
+                            annotatedText.getStringAnnotations(
+                                tag = "SETS",
+                                start = offset,
+                                end = offset
+                            ).firstOrNull()?.let {
+                                onClickSets()
+                            }
+                        }
                     )
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -147,29 +183,21 @@ fun PartInfoScreen(
                                 fontSize = 13.sp)
                         )
                     }
-                    /*LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 400.dp)
-                            .padding(bottom = 8.dp)
-                            .background(Color(0xFFEEEEEE)),
-                        contentPadding = PaddingValues(4.dp)
-                    ) {
-                        items(colors) { color ->
-                            Box(
-                                modifier = Modifier
-                                    .padding(1.dp)
-                                    .fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = "${color.color_name} (${color.num_sets})",
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 11.sp),
-                                    color = Color.Black
-                                )
-                            }
+                    if (partColors.size>1) {
+                        ColorList(partColors, onClickSets = onClickSets)
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                        ) {
+                            Text(
+                                text = "No colors available",
+                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
-                    }*/
+                    }
                 }
             }
         }
