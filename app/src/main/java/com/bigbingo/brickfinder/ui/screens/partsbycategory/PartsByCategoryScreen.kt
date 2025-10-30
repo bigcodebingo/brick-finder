@@ -20,7 +20,6 @@ import com.bigbingo.brickfinder.ui.screens.LoadingScreen
 fun PartsByCategoryScreen(
     categoryId: Int,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier,
     viewModel: PartsViewModel = viewModel(),
     onPartClick: (String) -> Unit
 ) {
@@ -55,7 +54,11 @@ fun PartsByCategoryScreen(
                     currentPage = currentPage,
                     totalPages = totalPages,
                     pageSize = pageSize,
-                    onBack = onBack
+                    onBack = {
+                        viewModel.clearParts()
+                        viewModel.resetCurrentPage()
+                        onBack()
+                    }
                 )
             },
             bottomBar = {

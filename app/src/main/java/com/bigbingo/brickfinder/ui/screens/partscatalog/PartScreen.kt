@@ -25,8 +25,6 @@ fun PartScreen(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        viewModel.clearParts()
-        viewModel.resetCurrentPage()
         viewModel.fetchCategoriesFromDb(context)
     }
 

@@ -2,9 +2,9 @@ package com.bigbingo.brickfinder.ui.screens.partinfo
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,6 +32,10 @@ import com.bigbingo.brickfinder.ui.screens.PartTopBar
 fun PartInfoScreen(
     partNum: String,
     onBack: () -> Unit,
+    onCatalogClick: () -> Unit,
+    onPartsClick: () -> Unit,
+    onCategoryClick: () -> Unit,
+    onPartNumClick: () -> Unit,
     onClickSets: (Part) -> Unit,
     viewModel: PartsViewModel = viewModel(),
 ) {
@@ -61,8 +65,6 @@ fun PartInfoScreen(
         }
     }
 
-
-
     if (isFirstLoad.value && part == null) {
         LoadingScreen()
     }
@@ -70,11 +72,18 @@ fun PartInfoScreen(
         Scaffold(
             topBar = {
                 PartTopBar(
-                    titleText = "$categoryName: ${part?.part_num ?: partNum}",
+                    partNum = part?.part_num,
+                    categoryName = categoryName,
                     onBack = {
                         viewModel.clearPart()
                         onBack()
-                    }
+                    },
+                    onCatalogClick = onCatalogClick,
+                    onPartsClick = onPartsClick,
+                    onCategoryClick = onCategoryClick,
+                    onPartNumClick = onPartNumClick,
+                    viewModel = viewModel,
+                    showInSets = false
                 )
             },
             containerColor = Color.White
@@ -139,35 +148,23 @@ fun PartInfoScreen(
 
                     val count = setNums.size
                     val plural = if (count == 1) "set" else "sets"
-                    val annotatedText = buildAnnotatedString {
-                        append("Item appears in: ")
-                        pushStringAnnotation(tag = "SETS", annotation = "sets_click")
-                        withStyle(
-                            style = SpanStyle(
-                                color = Color(0xFF1565C0),
+
+                    Row {
+                        Text(
+                            text = "Item appears in: ",
+                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 13.sp, color = Color.Black)
+                        )
+                        Text(
+                            text = "$count $plural",
+                            color = Color(0xFF1565C0),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontSize = 13.sp,
                                 textDecoration = TextDecoration.Underline
-                            )
-                        ) {
-                            append("$count $plural")
-                        }
-                        pop()
+                            ),
+                            modifier = Modifier.clickable { onClickSets(p) }
+                        )
                     }
-                    ClickableText(
-                        text = annotatedText,
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontSize = 13.sp,
-                            color = Color.Black
-                        ),
-                        onClick = { offset ->
-                            annotatedText.getStringAnnotations(
-                                tag = "SETS",
-                                start = offset,
-                                end = offset
-                            ).firstOrNull()?.let {
-                                onClickSets(p)
-                            }
-                        }
-                    )
+
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Box(
@@ -185,7 +182,7 @@ fun PartInfoScreen(
                         )
                     }
                     if (partColors.size>1) {
-                        /*ColorList(partColors, onClickSets = onClickSets)*/
+                        ColorList(partColors)
                     } else {
                         Box(
                             modifier = Modifier
