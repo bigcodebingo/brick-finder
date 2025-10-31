@@ -1,29 +1,30 @@
 package com.bigbingo.brickfinder.ui.screens.inventoryscreen
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.data.Part
+import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.data.db.DatabaseHelper
 import com.bigbingo.brickfinder.ui.screens.PartTopBar
+import com.bigbingo.brickfinder.ui.screens.inventoryscreen.components.InventoryList
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 
 @Composable
 fun InventoryScreen(
     part: Part,
+    setNums: List<String>,
+    selectedColor: PartColor? = null,
     onBack: () -> Unit,
     onCatalogClick: () -> Unit,
     onPartsClick: () -> Unit,
@@ -33,11 +34,22 @@ fun InventoryScreen(
     ) {
 
     val context = LocalContext.current
+    val partAppearances by viewModel.partAppearances.collectAsState()
+
+    val filteredAppearances = if (selectedColor != null) {
+        partAppearances.filter { it.color.id == selectedColor.id }
+    } else {
+        partAppearances
+    }
     val categoryName = remember(part) {
         part.let { p ->
             DatabaseHelper.getPartCategories(context)
                 .find { it.id == p.part_cat_id }?.name
         }
+    }
+
+    LaunchedEffect(part) {
+        viewModel.loadPartAppearances(context, part.part_num, setNums)
     }
 
     Scaffold(
@@ -58,24 +70,11 @@ fun InventoryScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
+                .padding(innerPadding)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = "Information about part: ${part.part_num}",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = Color.DarkGray
-                )
-                Text(
-                    text = "Name: ${part.name}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Black
-                )
-            }
+            InventoryList(
+                sets = filteredAppearances,
+            )
         }
     }
 }

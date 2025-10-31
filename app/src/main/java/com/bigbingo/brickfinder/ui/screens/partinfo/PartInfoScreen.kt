@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.bigbingo.brickfinder.data.Part
+import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.ui.screens.LoadingScreen
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 import com.bigbingo.brickfinder.data.db.DatabaseHelper
@@ -36,7 +37,8 @@ fun PartInfoScreen(
     onPartsClick: () -> Unit,
     onCategoryClick: () -> Unit,
     onPartNumClick: () -> Unit,
-    onClickSets: (Part) -> Unit,
+    onSetsClick: (Part, List<String>) -> Unit,
+    onColorClick: (Part, List<String>, PartColor) -> Unit,
     viewModel: PartsViewModel = viewModel(),
 ) {
     val context = LocalContext.current
@@ -76,6 +78,7 @@ fun PartInfoScreen(
                     categoryName = categoryName,
                     onBack = {
                         viewModel.clearPart()
+                        viewModel.clearPartAppearances()
                         onBack()
                     },
                     onCatalogClick = onCatalogClick,
@@ -148,20 +151,23 @@ fun PartInfoScreen(
 
                     val count = setNums.size
                     val plural = if (count == 1) "set" else "sets"
-
+                    val clickableModifier = if (count > 0) {
+                        Modifier.clickable { onSetsClick(p, setNums) }
+                    } else { Modifier }
                     Row {
                         Text(
                             text = "Item appears in: ",
-                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 13.sp, color = Color.Black)
-                        )
-                        Text(
-                            text = "$count $plural",
-                            color = Color(0xFF1565C0),
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontSize = 13.sp,
-                                textDecoration = TextDecoration.Underline
+                                color = Color.Black))
+                        Text(
+                            text = "$count $plural",
+                            color = if (count > 0) Color(0xFF1565C0) else Color.Gray,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontSize = 13.sp,
+                                textDecoration = if (count > 0) TextDecoration.Underline else TextDecoration.None
                             ),
-                            modifier = Modifier.clickable { onClickSets(p) }
+                            modifier = clickableModifier
                         )
                     }
 
@@ -182,7 +188,9 @@ fun PartInfoScreen(
                         )
                     }
                     if (partColors.size>1) {
-                        ColorList(partColors)
+                        ColorList(partColors) { color ->
+                            onColorClick(p, setNums, color)
+                        }
                     } else {
                         Box(
                             modifier = Modifier

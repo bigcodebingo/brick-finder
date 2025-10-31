@@ -28,9 +28,7 @@ import androidx.compose.ui.text.style.TextDecoration
 @Composable
 fun ColorList(
     partColors: List<PartColor>,
-/*
-    onClickSets: () -> Unit,
-*/
+    onColorClick: (PartColor) -> Unit,
 ) {
     LazyVerticalGrid(
         contentPadding = PaddingValues(top = 2.dp, bottom = 2.dp),
@@ -63,7 +61,7 @@ fun ColorList(
                         fontWeight = FontWeight.Medium,
                         textDecoration = TextDecoration.Underline,
                     ),
-                    modifier = Modifier.clickable { }
+                    modifier = Modifier.clickable { onColorClick(color) }
 
                 )
             }

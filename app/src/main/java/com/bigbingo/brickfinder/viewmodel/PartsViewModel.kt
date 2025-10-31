@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.data.Part
+import com.bigbingo.brickfinder.data.PartAppearance
 import com.bigbingo.brickfinder.data.PartCategory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +38,16 @@ class PartsViewModel : ViewModel() {
     private val _partColors = MutableStateFlow<List<PartColor>>(emptyList())
     val partColors: StateFlow<List<PartColor>> = _partColors
 
+    private val _partAppearances = MutableStateFlow<List<PartAppearance>>(emptyList())
+    val partAppearances: StateFlow<List<PartAppearance>> = _partAppearances
+
+    fun loadPartAppearances(context: Context, partNum: String, setNums: List<String>) {
+        viewModelScope.launch {
+            val appearances = DatabaseHelper.getPartAppearancesInSets(context, partNum, setNums)
+            _partAppearances.value = appearances
+        }
+    }
+
     fun loadPartInfo(context: Context, partNum: String) {
         viewModelScope.launch {
             val (setNums, minMaxYear, colorCounts) = DatabaseHelper.getPartInfo(context, partNum)
@@ -56,19 +67,19 @@ class PartsViewModel : ViewModel() {
         }
     }
 
+    fun clearPartAppearances() {
+        _partAppearances.value = emptyList()
+    }
     fun clearParts() {
         _parts.value = emptyList()
         _totalParts.value = 0
     }
-
     fun resetCurrentPage() {
         _currentPage.value = 1
     }
-
     fun clearPart() {
         _part.value = null
     }
-
     fun loadPartFromDb(context: Context, partNum: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val p = DatabaseHelper.getPartByNum(context, partNum)

@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.bigbingo.brickfinder.data.Part
+import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.PartsByCategoryScreen
 import com.bigbingo.brickfinder.ui.screens.home.HomeScreen
 import com.bigbingo.brickfinder.ui.screens.inventoryscreen.InventoryScreen
@@ -50,6 +51,10 @@ fun MainContent() {
     var selectedSetNum by remember { mutableStateOf("") }
 
     var selectedPart by remember { mutableStateOf<Part?>(null) }
+    var selectedSetNums by remember { mutableStateOf<List<String>>(emptyList()) }
+    var selectedPartColor by remember { mutableStateOf<PartColor?>(null) }
+
+
     val showBottomBar = selectedIndex in listOf(0, 1, 2)
 
     Scaffold(
@@ -108,8 +113,16 @@ fun MainContent() {
             7 -> PartInfoScreen(
                 partNum = selectedPartNum,
                 onBack = { selectedIndex = 4 },
-                onClickSets = { part ->
-                    selectedPart = part 
+                onSetsClick = { part, setNums ->
+                    selectedPart = part
+                    selectedSetNums = setNums
+                    selectedPartColor = null
+                    selectedIndex = 9
+                },
+                onColorClick = { part, setNums, color ->
+                    selectedPart = part
+                    selectedSetNums = setNums
+                    selectedPartColor = color
                     selectedIndex = 9
                 },
                 onCatalogClick = { selectedIndex = 1 },
@@ -125,6 +138,8 @@ fun MainContent() {
                 selectedPart?.let { part ->
                     InventoryScreen(
                         part = selectedPart!!,
+                        setNums = selectedSetNums,
+                        selectedColor = selectedPartColor,
                         onBack = { selectedIndex = 7 },
                         onCatalogClick = { selectedIndex = 1 },
                         onPartsClick = { selectedIndex = 3 },

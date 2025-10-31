@@ -3,6 +3,8 @@ package com.bigbingo.brickfinder.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -36,7 +38,7 @@ fun PartTopBar(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    text = "Catalog: ",
+                    text = "Catalog:",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleLarge.copy(fontSize = 12.sp),
@@ -46,10 +48,12 @@ fun PartTopBar(
                         viewModel?.clearPart()
                         viewModel?.clearParts()
                         viewModel?.resetCurrentPage()
+                        viewModel?.clearPartAppearances()
                     }
                 )
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "Parts: ",
+                    text = "Parts:",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleLarge.copy(fontSize = 12.sp),
@@ -58,32 +62,35 @@ fun PartTopBar(
                         onPartsClick()
                         viewModel?.clearPart()
                         viewModel?.clearParts()
+                        viewModel?.clearPartAppearances()
+
                     }
                 )
-                categoryName?.let {
-                    Text(
-                        text = "${categoryName}: ",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 12.sp),
-                        textDecoration = TextDecoration.Underline,
-                        modifier = Modifier.clickable {
-                            onCategoryClick()
-                            viewModel?.clearPart()
-                        }
-                    )
-                }
-                partNum?.let {
-                    Text(
-                        text = "${partNum}: ",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 12.sp),
-                        textDecoration = TextDecoration.Underline,
-                        modifier = Modifier.clickable { onPartNumClick() }
-                    )
-                }
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "${categoryName}:",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 12.sp),
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier.clickable {
+                        onCategoryClick()
+                        viewModel?.clearPart()
+                        viewModel?.clearPartAppearances()
+
+                    }
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "${partNum}:",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 12.sp),
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier.clickable { onPartNumClick() }
+                )
                 if (showInSets) {
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "In sets",
                         color = Color.White,
@@ -93,6 +100,7 @@ fun PartTopBar(
                 }
             }
         },
+        expandedHeight = 50.dp,
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(

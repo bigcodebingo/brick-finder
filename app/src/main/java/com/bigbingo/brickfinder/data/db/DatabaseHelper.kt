@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.data.Part
+import com.bigbingo.brickfinder.data.PartAppearance
 import com.bigbingo.brickfinder.data.PartCategory
 import com.bigbingo.brickfinder.data.SetTheme
 import com.bigbingo.brickfinder.data.Set
@@ -278,5 +279,63 @@ object DatabaseHelper {
         cursor.close()
         db.close()
         return colors
+    }
+
+    fun getPartAppearancesInSets(context: Context, partNum: String, setNums: List<String>): List<PartAppearance> {
+        if (setNums.isEmpty()) return emptyList()
+        val db = getDatabase(context)
+        val placeholders = setNums.joinToString(",") { "?" }
+
+        val query = """
+        SELECT s.set_num, s.name, s.year, s.theme_id, s.num_parts, s.set_img_url,
+               ip.quantity, ip.color_id
+        FROM inventory_parts AS ip
+        JOIN inventories AS inv ON ip.inventory_id = inv.id
+        JOIN sets AS s ON inv.set_num = s.set_num
+        WHERE ip.part_num = ?
+          AND inv.set_num IN ($placeholders)
+    """.trimIndent()
+
+        val args = mutableListOf<String>()
+        args.add(partNum)
+        args.addAll(setNums)
+
+        val cursor = db.rawQuery(query, args.toTypedArray())
+        val tempData = mutableListOf<Triple<Set, Int, Int>>() // Set, quantity, colorId
+        val colorIds = mutableSetOf<Int>()
+
+        while (cursor.moveToNext()) {
+            val set = Set(
+                set_num = cursor.getString(0),
+                name = cursor.getString(1),
+                year = cursor.getInt(2),
+                theme_id = cursor.getString(3),
+                num_parts = cursor.getString(4),
+                set_img_url = cursor.getString(5)
+            )
+
+            val quantity = cursor.getInt(6)
+            val colorId = cursor.getInt(7)
+            colorIds.add(colorId)
+
+            tempData.add(Triple(set, quantity, colorId))
+        }
+
+        cursor.close()
+        db.close()
+
+        val colors = getColorsByIds(context, colorIds.toList())
+        val colorMap = colors.associateBy { it.id }
+
+        val appearances = tempData.mapNotNull { (set, quantity, colorId) ->
+            val color = colorMap[colorId] ?: return@mapNotNull null
+            PartAppearance(
+                set = set,
+                quantity = quantity,
+                color = color
+            )
+        }
+
+        return appearances.distinctBy { it.set.set_num }
     }
 }
