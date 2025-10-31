@@ -291,9 +291,12 @@ object DatabaseHelper {
                ip.quantity, ip.color_id
         FROM inventory_parts AS ip
         JOIN inventories AS inv ON ip.inventory_id = inv.id
-        JOIN sets AS s ON inv.set_num = s.set_num
+        LEFT JOIN inventory_minifigs AS imf ON inv.set_num = imf.fig_num
+        JOIN inventories AS inv_real 
+            ON inv_real.id = COALESCE(imf.inventory_id, inv.id)
+        JOIN sets AS s ON inv_real.set_num = s.set_num
         WHERE ip.part_num = ?
-          AND inv.set_num IN ($placeholders)
+          AND inv_real.set_num IN ($placeholders)
     """.trimIndent()
 
         val args = mutableListOf<String>()
@@ -336,6 +339,6 @@ object DatabaseHelper {
             )
         }
 
-        return appearances.distinctBy { it.set.set_num }
+        return appearances.distinctBy { it.set.set_num to it.color.id }
     }
 }

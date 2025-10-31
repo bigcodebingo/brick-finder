@@ -1,5 +1,6 @@
 package com.bigbingo.brickfinder.ui.screens.inventoryscreen.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -34,11 +35,13 @@ fun InventoryList(
                 InventoryColorHeader(color = color)
             }
 
-            itemsIndexed(appearances) { index, set ->
+            itemsIndexed(appearances) { index, appearance ->
                 val backgroundColor = if (index % 2 == 0) Color.White else Color(0xFFF5F5F5)
 
+                Log.d("InventoryList", "PartAppearance: set=${appearance.set.set_num}, color=${appearance.color.name}, qty=${appearance.quantity}")
+
                 InventoryCard(
-                    set = set,
+                    set = appearance,
                     backgroundColor = backgroundColor
                 )
             }
