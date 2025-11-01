@@ -1,5 +1,6 @@
 package com.bigbingo.brickfinder.ui.screens.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +21,8 @@ fun HomeScreen(
         modifier = modifier
             .fillMaxSize()
             .padding(top = 12.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
+            .background(MaterialTheme.colorScheme.background)
+
     ) {
         SearchField(
             value = searchQuery,

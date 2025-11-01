@@ -15,11 +15,14 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.res.painterResource
 import com.bigbingo.brickfinder.R
 
 @Composable
 fun HomeStaticCards(onNavigate: (Int) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -30,9 +33,9 @@ fun HomeStaticCards(onNavigate: (Int) -> Unit) {
                 .weight(1f)
                 .height(180.dp)
                 .clickable { onNavigate(3) },
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = colors.surface),
             shape = RoundedCornerShape(0.dp),
-            border = BorderStroke(1.dp, Color.LightGray)
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -57,6 +60,9 @@ fun HomeStaticCards(onNavigate: (Int) -> Unit) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+/*
+                        .background(Color(0x80daeef6))
+*/
                         .background(Color(0x80daeef6))
                         .padding(vertical = 5.dp),
                     contentAlignment = Alignment.Center
@@ -64,7 +70,7 @@ fun HomeStaticCards(onNavigate: (Int) -> Unit) {
                     Text(
                         text = "Parts",
                         fontSize = 16.sp,
-                        color = Color.Black
+                        color = colors.onPrimary
                     )
                 }
             }
@@ -75,9 +81,9 @@ fun HomeStaticCards(onNavigate: (Int) -> Unit) {
                 .weight(1f)
                 .height(180.dp)
                 .clickable { onNavigate(5) },
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = colors.surface),
             shape = RoundedCornerShape(0.dp),
-            border = BorderStroke(1.dp, Color.LightGray)
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -102,7 +108,7 @@ fun HomeStaticCards(onNavigate: (Int) -> Unit) {
                     Text(
                         text = "Sets",
                         fontSize = 16.sp,
-                        color = Color.Black
+                        color = colors.onPrimary
                     )
                 }
             }

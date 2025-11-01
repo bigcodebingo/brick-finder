@@ -11,37 +11,51 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Color.Black,
+    secondary = Color.Black,
+    tertiary = Color.Red,
+    background = Color(0xFF1E1E1E),
+    surface = Color(0xff424242),
+    onPrimary = Color.White,
+    onSecondary = Color.LightGray,
+    onTertiary = Color.Black,
+    onBackground = Color.White,
+    onSurface = Color.White,
+
+    outlineVariant = Color(0xFF1E1E1E),
+    outline = Color.Gray
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = Color.Gray,
+    onPrimary = Color.Black,
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    secondary = Color.Green,
+    onSecondary = Color.DarkGray,
+
+    tertiary = Color.Yellow,
+    onTertiary = Color.Black,
+
+    background = Color.White,
+    onBackground = Color.Black,
+
+    surface = Color.White,
+    onSurface = Color( 0xFF0788CA),
+
+
+    outline = Color.LightGray
 )
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BrickFinderTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
