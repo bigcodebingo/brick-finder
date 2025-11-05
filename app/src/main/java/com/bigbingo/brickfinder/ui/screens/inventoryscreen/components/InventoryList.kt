@@ -14,7 +14,6 @@ import com.bigbingo.brickfinder.data.PartAppearance
 import com.bigbingo.brickfinder.data.Set
 import com.bigbingo.brickfinder.ui.screens.setsbytheme.components.ColumnHeader
 
-
 @Composable
 fun InventoryList(
     sets: List<PartAppearance>,
