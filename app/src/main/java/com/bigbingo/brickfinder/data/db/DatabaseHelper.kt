@@ -287,16 +287,18 @@ object DatabaseHelper {
         val placeholders = setNums.joinToString(",") { "?" }
 
         val query = """
-        SELECT s.set_num, s.name, s.year, s.theme_id, s.num_parts, s.set_img_url,
-               ip.quantity, ip.color_id
+        SELECT 
+            s.set_num, s.name, s.year, s.theme_id, s.num_parts, s.set_img_url,
+            ip.quantity, ip.color_id,
+            inv.set_num AS orig_set_num,
+            inv_real.set_num AS resolved_set_num
         FROM inventory_parts AS ip
         JOIN inventories AS inv ON ip.inventory_id = inv.id
-        LEFT JOIN inventory_minifigs AS imf ON inv.set_num = imf.fig_num
-        JOIN inventories AS inv_real 
-            ON inv_real.id = COALESCE(imf.inventory_id, inv.id)
-        JOIN sets AS s ON inv_real.set_num = s.set_num
+        LEFT JOIN inventory_minifigs AS imf ON imf.fig_num = inv.set_num
+        LEFT JOIN inventories AS inv_real ON inv_real.id = COALESCE(imf.inventory_id, inv.id)
+        JOIN sets AS s ON s.set_num = inv_real.set_num
         WHERE ip.part_num = ?
-          AND inv_real.set_num IN ($placeholders)
+          AND (inv.set_num IN ($placeholders) OR inv_real.set_num IN ($placeholders))
     """.trimIndent()
 
         val args = mutableListOf<String>()
@@ -304,7 +306,7 @@ object DatabaseHelper {
         args.addAll(setNums)
 
         val cursor = db.rawQuery(query, args.toTypedArray())
-        val tempData = mutableListOf<Triple<Set, Int, Int>>() // Set, quantity, colorId
+        val tempData = mutableListOf<Triple<Set, Int, Int>>()
         val colorIds = mutableSetOf<Int>()
 
         while (cursor.moveToNext()) {
