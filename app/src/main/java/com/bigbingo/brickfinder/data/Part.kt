@@ -6,5 +6,6 @@ data class Part(
     val part_cat_id: Int,
     val part_url: String? = null,
     val part_img_url: String? = null,
+    val quantity: Int = 0,
     val external_ids: Map<String, List<String>>? = null
 )

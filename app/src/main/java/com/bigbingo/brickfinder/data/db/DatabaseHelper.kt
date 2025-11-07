@@ -2,12 +2,16 @@ package com.bigbingo.brickfinder.data.db
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.util.Log
+import com.bigbingo.brickfinder.data.PartColorCount
 import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.data.PartAppearance
 import com.bigbingo.brickfinder.data.PartCategory
 import com.bigbingo.brickfinder.data.SetTheme
 import com.bigbingo.brickfinder.data.Set
+import com.bigbingo.brickfinder.data.SetInfo
+import com.bigbingo.brickfinder.data.SetInventory
 
 object DatabaseHelper {
 
@@ -194,25 +198,22 @@ object DatabaseHelper {
         return part
     }
 
-    data class ColorCount(
-        val colorId: Int,
-        val count: Int
-    )
-
     fun getPartInfo(
         context: Context,
         partNum: String
-    ): Triple<List<String>, Pair<Int?, Int?>, List<ColorCount>> {
+    ): Triple<List<String>, Pair<Int?, Int?>, List<PartColorCount>> {
         val db = getDatabase(context)
 
         val setNums = mutableListOf<String>()
         val setsQuery = """
-        SELECT DISTINCT inv.set_num
+        SELECT DISTINCT COALESCE(inv_parent.set_num, inv.set_num) AS real_set_num
         FROM inventory_parts AS ip
-        INNER JOIN inventories AS inv
-            ON ip.inventory_id = inv.id
+        JOIN inventories AS inv ON ip.inventory_id = inv.id
+        LEFT JOIN inventory_minifigs AS imf ON imf.fig_num = inv.set_num
+        LEFT JOIN inventories AS inv_parent ON inv_parent.id = imf.inventory_id
         WHERE ip.part_num = ?
-    """.trimIndent()
+          AND (inv_parent.set_num IS NOT NULL OR inv.set_num NOT LIKE 'fig-%')
+        """.trimIndent()
 
         val cursorSets = db.rawQuery(setsQuery, arrayOf(partNum))
         while (cursorSets.moveToNext()) {
@@ -237,21 +238,29 @@ object DatabaseHelper {
             cursorYear.close()
         }
 
-        val colorCounts = mutableListOf<ColorCount>()
+        val colorCounts = mutableListOf<PartColorCount>()
         val colorQuery = """
-        SELECT ip.color_id, COUNT(DISTINCT inv.set_num) AS set_count
+        SELECT 
+            ip.color_id, 
+            COUNT(DISTINCT COALESCE(inv_parent.set_num, inv.set_num)) AS set_count
         FROM inventory_parts AS ip
-        INNER JOIN inventories AS inv
+        JOIN inventories AS inv 
             ON ip.inventory_id = inv.id
+        LEFT JOIN inventory_minifigs AS imf 
+            ON imf.fig_num = inv.set_num
+        LEFT JOIN inventories AS inv_parent 
+            ON inv_parent.id = imf.inventory_id
         WHERE ip.part_num = ?
+          AND (inv_parent.set_num IS NOT NULL OR inv.set_num NOT LIKE 'fig-%')
         GROUP BY ip.color_id
-    """.trimIndent()
+        """.trimIndent()
 
         val cursorColors = db.rawQuery(colorQuery, arrayOf(partNum))
         while (cursorColors.moveToNext()) {
             val colorId = cursorColors.getInt(0)
             val count = cursorColors.getInt(1)
-            colorCounts.add(ColorCount(colorId, count))
+
+            colorCounts.add(PartColorCount(colorId, count))
         }
         cursorColors.close()
 
@@ -289,24 +298,23 @@ object DatabaseHelper {
         val query = """
         SELECT 
             s.set_num, s.name, s.year, s.theme_id, s.num_parts, s.set_img_url,
-            ip.quantity, ip.color_id,
-            inv.set_num AS orig_set_num,
-            inv_real.set_num AS resolved_set_num
+            ip.color_id
         FROM inventory_parts AS ip
         JOIN inventories AS inv ON ip.inventory_id = inv.id
         LEFT JOIN inventory_minifigs AS imf ON imf.fig_num = inv.set_num
-        LEFT JOIN inventories AS inv_real ON inv_real.id = COALESCE(imf.inventory_id, inv.id)
-        JOIN sets AS s ON s.set_num = inv_real.set_num
+        LEFT JOIN inventories AS inv_parent ON inv_parent.id = imf.inventory_id
+        JOIN sets AS s ON s.set_num = COALESCE(inv_parent.set_num, inv.set_num)
         WHERE ip.part_num = ?
-          AND (inv.set_num IN ($placeholders) OR inv_real.set_num IN ($placeholders))
+          AND COALESCE(inv_parent.set_num, inv.set_num) IN ($placeholders)
     """.trimIndent()
 
-        val args = mutableListOf<String>()
-        args.add(partNum)
-        args.addAll(setNums)
+        val args = mutableListOf<String>().apply {
+            add(partNum)
+            addAll(setNums)
+        }
 
         val cursor = db.rawQuery(query, args.toTypedArray())
-        val tempData = mutableListOf<Triple<Set, Int, Int>>()
+        val tempData = mutableListOf<Pair<Set, Int>>() // <Set, colorId>
         val colorIds = mutableSetOf<Int>()
 
         while (cursor.moveToNext()) {
@@ -319,11 +327,9 @@ object DatabaseHelper {
                 set_img_url = cursor.getString(5)
             )
 
-            val quantity = cursor.getInt(6)
-            val colorId = cursor.getInt(7)
+            val colorId = cursor.getInt(6)
             colorIds.add(colorId)
-
-            tempData.add(Triple(set, quantity, colorId))
+            tempData.add(set to colorId)
         }
 
         cursor.close()
@@ -332,15 +338,80 @@ object DatabaseHelper {
         val colors = getColorsByIds(context, colorIds.toList())
         val colorMap = colors.associateBy { it.id }
 
-        val appearances = tempData.mapNotNull { (set, quantity, colorId) ->
+        val appearances = tempData.mapNotNull { (set, colorId) ->
             val color = colorMap[colorId] ?: return@mapNotNull null
             PartAppearance(
                 set = set,
-                quantity = quantity,
+                quantity = 0,
                 color = color
             )
         }
 
         return appearances.distinctBy { it.set.set_num to it.color.id }
+    }
+
+    fun getSetInfo(context: Context, setNum: String): SetInfo {
+        val db = getDatabase(context)
+
+        val setCursor = db.rawQuery(
+            "SELECT year, num_parts FROM sets WHERE set_num = ?",
+            arrayOf(setNum)
+        )
+        if (!setCursor.moveToFirst()) throw Exception("Set not found: $setNum")
+        val year = setCursor.getInt(0)
+        val numParts = setCursor.getInt(1)
+        setCursor.close()
+
+        val inventories = mutableListOf<SetInventory>()
+        val invCursor = db.rawQuery(
+            "SELECT id, version FROM inventories WHERE set_num = ?",
+            arrayOf(setNum)
+        )
+        while (invCursor.moveToNext()) {
+            val invId = invCursor.getInt(0)
+            val version = invCursor.getInt(1)
+
+            val parts = mutableListOf<Triple<String, String?, Int>>()
+            val partCursor = db.rawQuery(
+                """
+            SELECT inventory_parts.part_num, inventory_parts.img_url, inventory_parts.quantity
+            FROM inventory_parts
+            JOIN parts ON inventory_parts.part_num = parts.part_num
+            WHERE inventory_parts.inventory_id = ? AND (inventory_parts.is_spare IS NULL OR inventory_parts.is_spare = 0)
+            """,
+                arrayOf(invId.toString())
+            )
+            while (partCursor.moveToNext()) {
+                val partNum = partCursor.getString(0)
+                val imgUrl = partCursor.getString(1)
+                val qty = partCursor.getInt(2)
+                parts.add(Triple(partNum, imgUrl, qty))
+            }
+            partCursor.close()
+
+            val minifigs = mutableListOf<Triple<String, String?, Int>>()
+            val figCursor = db.rawQuery(
+                """
+            SELECT inventory_minifigs.fig_num, minifigs.img_url, inventory_minifigs.quantity
+            FROM inventory_minifigs
+            JOIN minifigs ON inventory_minifigs.fig_num = minifigs.fig_num
+            WHERE inventory_minifigs.inventory_id = ?
+            """,
+                arrayOf(invId.toString())
+            )
+            while (figCursor.moveToNext()) {
+                val figNum = figCursor.getString(0)
+                val imgUrl = figCursor.getString(1)
+                val qty = figCursor.getInt(2)
+                minifigs.add(Triple(figNum, imgUrl, qty))
+            }
+            figCursor.close()
+
+            inventories.add(SetInventory(invId, version, parts, minifigs))
+        }
+        invCursor.close()
+        db.close()
+
+        return SetInfo(setNum, year, numParts, inventories)
     }
 }

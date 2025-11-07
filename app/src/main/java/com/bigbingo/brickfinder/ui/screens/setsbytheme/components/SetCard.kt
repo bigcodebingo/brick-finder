@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,6 +55,9 @@ fun SetCard(
                     fontSize = 11.sp,
                     lineHeight = 14.sp,
                     maxLines = 1,
+                    color = Color(0xFF1565C0),
+                    overflow = TextOverflow.Ellipsis,
+                    textDecoration = TextDecoration.Underline,
                     modifier = Modifier.clickable { onClick() }
                 )
             }

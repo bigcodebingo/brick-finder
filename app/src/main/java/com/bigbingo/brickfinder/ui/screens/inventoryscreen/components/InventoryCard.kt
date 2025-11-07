@@ -1,5 +1,6 @@
 package com.bigbingo.brickfinder.ui.screens.inventoryscreen.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -9,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -20,6 +22,7 @@ import com.bigbingo.brickfinder.data.PartAppearance
 fun InventoryCard(
     set: PartAppearance,
     backgroundColor: Color,
+    onSetNumClick: (String) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -55,7 +58,10 @@ fun InventoryCard(
                     fontSize = 11.sp,
                     lineHeight = 14.sp,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    textDecoration = TextDecoration.Underline,
+                    color = Color(0xFF1565C0),
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.clickable { onSetNumClick(set.set.set_num) }
                 )
             }
             Spacer(modifier = Modifier.weight(1f))

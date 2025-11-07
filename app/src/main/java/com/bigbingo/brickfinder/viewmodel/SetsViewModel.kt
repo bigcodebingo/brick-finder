@@ -3,11 +3,13 @@ package com.bigbingo.brickfinder.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.data.SetTheme
 import com.bigbingo.brickfinder.data.db.DatabaseHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import com.bigbingo.brickfinder.data.Set
+import com.bigbingo.brickfinder.data.SetInventory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,6 +27,25 @@ class SetsViewModel : ViewModel() {
     val totalSets: StateFlow<Int> = _totalSets
     private val _currentPage = MutableStateFlow(1)
     val currentPage: StateFlow<Int> = _currentPage
+
+    private val _setYear = MutableStateFlow<Int?>(null)
+    val setYear: StateFlow<Int?> = _setYear
+
+    private val _setNumParts = MutableStateFlow<Int?>(null)
+    val setNumParts: StateFlow<Int?> = _setNumParts
+
+    private val _setParts = MutableStateFlow<List<Triple<String, String?, Int>>>(emptyList())
+    val setParts: StateFlow<List<Triple<String, String?, Int>>> = _setParts
+
+    private val _setMinifigs = MutableStateFlow<List<Triple<String, String?, Int>>>(emptyList())
+    val setMinifigs: StateFlow<List<Triple<String, String?, Int>>> = _setMinifigs
+
+    private val _setInventories = MutableStateFlow<List<SetInventory>>(emptyList())
+    val setInventories: StateFlow<List<SetInventory>> = _setInventories
+
+    private val _selectedInventory = MutableStateFlow<SetInventory?>(null)
+    val selectedInventory: StateFlow<SetInventory?> = _selectedInventory
+
     fun clearSets() {
         _sets.value = emptyList()
     }
@@ -81,5 +102,21 @@ class SetsViewModel : ViewModel() {
         return childrenMap[parentId]
             ?.map { child -> ThemeNode(child, buildChildren(child.id, childrenMap)) }
             ?: emptyList()
+    }
+
+    fun loadSetInfo(context: Context, setNum: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val info = DatabaseHelper.getSetInfo(context, setNum)
+            withContext(Dispatchers.Main) {
+                _setYear.value = info.year
+                _setNumParts.value = info.totalParts
+                _setInventories.value = info.inventories
+                _selectedInventory.value = info.inventories.firstOrNull()
+            }
+        }
+    }
+
+    fun selectInventory(index: Int) {
+        _selectedInventory.value = _setInventories.value.getOrNull(index)
     }
 }

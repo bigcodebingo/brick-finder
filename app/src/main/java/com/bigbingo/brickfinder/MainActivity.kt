@@ -199,6 +199,10 @@ fun MainContent(
                         onPartsClick = { selectedIndex = 3 },
                         onCategoryClick = { selectedIndex = 4 },
                         onPartNumClick = { selectedIndex = 7 },
+                        onSetNumClick = { setNum ->
+                            selectedSetNum = setNum
+                            selectedIndex = 8
+                        }
                     )
                 }
             }

@@ -17,6 +17,7 @@ import com.bigbingo.brickfinder.ui.screens.setsbytheme.components.ColumnHeader
 @Composable
 fun InventoryList(
     sets: List<PartAppearance>,
+    onSetNumClick: (String) -> Unit
 ) {
     val groupedByColor = sets.groupBy { it.color }
 
@@ -41,7 +42,8 @@ fun InventoryList(
 
                 InventoryCard(
                     set = appearance,
-                    backgroundColor = backgroundColor
+                    backgroundColor = backgroundColor,
+                    onSetNumClick = onSetNumClick
                 )
             }
         }
