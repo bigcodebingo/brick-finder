@@ -292,7 +292,7 @@ object DatabaseHelper {
 
     fun getPartAppearancesInSets(context: Context, partNum: String, setNums: List<String>): List<PartAppearance> {
         if (setNums.isEmpty()) return emptyList()
-        val db = getDatabase(context)
+        val db = DatabaseHelper.getDatabase(context)
         val placeholders = setNums.joinToString(",") { "?" }
 
         val query = """
@@ -306,6 +306,7 @@ object DatabaseHelper {
         JOIN sets AS s ON s.set_num = COALESCE(inv_parent.set_num, inv.set_num)
         WHERE ip.part_num = ?
           AND COALESCE(inv_parent.set_num, inv.set_num) IN ($placeholders)
+          AND inv.version = 1
     """.trimIndent()
 
         val args = mutableListOf<String>().apply {
@@ -331,23 +332,75 @@ object DatabaseHelper {
             colorIds.add(colorId)
             tempData.add(set to colorId)
         }
-
         cursor.close()
-        db.close()
 
         val colors = getColorsByIds(context, colorIds.toList())
         val colorMap = colors.associateBy { it.id }
 
-        val appearances = tempData.mapNotNull { (set, colorId) ->
+        val qtyMap = mutableMapOf<String, Int>()
+
+        val queryParts = """
+        SELECT inv.set_num, SUM(ip.quantity) as total_qty
+        FROM inventories AS inv
+        JOIN inventory_parts AS ip ON ip.inventory_id = inv.id
+        WHERE inv.set_num IN ($placeholders)
+          AND inv.version = 1
+          AND ip.part_num = ?
+          AND (ip.is_spare IS NULL OR ip.is_spare = 0)
+        GROUP BY inv.set_num
+    """.trimIndent()
+
+        val argsParts = mutableListOf<String>().apply {
+            addAll(setNums)
+            add(partNum)
+        }
+
+        val cursorParts = db.rawQuery(queryParts, argsParts.toTypedArray())
+        while (cursorParts.moveToNext()) {
+            val setNum = cursorParts.getString(0)
+            val qty = cursorParts.getInt(1)
+            qtyMap[setNum] = qty
+        }
+        cursorParts.close()
+
+        val queryMinifigs = """
+        SELECT inv.set_num, SUM(ip.quantity * imf.quantity) as total_qty
+        FROM inventories AS inv
+        JOIN inventory_minifigs AS imf ON imf.inventory_id = inv.id
+        JOIN inventories AS figInv ON figInv.set_num = imf.fig_num AND figInv.version = 1
+        JOIN inventory_parts AS ip ON ip.inventory_id = figInv.id
+        WHERE inv.set_num IN ($placeholders)
+          AND inv.version = 1
+          AND ip.part_num = ?
+          AND (ip.is_spare IS NULL OR ip.is_spare = 0)
+        GROUP BY inv.set_num
+    """.trimIndent()
+
+        val argsMinifigs = mutableListOf<String>().apply {
+            addAll(setNums)
+            add(partNum)
+        }
+
+        val cursorMinifigs = db.rawQuery(queryMinifigs, argsMinifigs.toTypedArray())
+        while (cursorMinifigs.moveToNext()) {
+            val setNum = cursorMinifigs.getString(0)
+            val qty = cursorMinifigs.getInt(1)
+            qtyMap[setNum] = (qtyMap[setNum] ?: 0) + qty
+        }
+        cursorMinifigs.close()
+        db.close()
+
+        return tempData.mapNotNull { (set, colorId) ->
             val color = colorMap[colorId] ?: return@mapNotNull null
+            val totalQty = qtyMap[set.set_num] ?: 0
             PartAppearance(
                 set = set,
-                quantity = 0,
+                quantity = totalQty,
                 color = color
             )
         }
-
-        return appearances.distinctBy { it.set.set_num to it.color.id }
+        .distinctBy { it.set.set_num to it.color.id }
+        .sortedBy { it.set.year }
     }
 
     fun getSetInfo(context: Context, setNum: String): SetInfo {
@@ -435,7 +488,6 @@ object DatabaseHelper {
             }
             figCursor.close()
 
-            // Суммируем одинаковые детали
             val minifigPartsMap = mutableMapOf<Pair<String, String?>, Int>()
             for ((partNum, imgUrl, qty) in minifigPartsTemp) {
                 val key = partNum to imgUrl

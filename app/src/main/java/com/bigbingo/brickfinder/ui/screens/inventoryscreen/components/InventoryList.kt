@@ -19,6 +19,7 @@ fun InventoryList(
     sets: List<PartAppearance>,
     onSetNumClick: (String) -> Unit
 ) {
+
     val groupedByColor = sets.groupBy { it.color }
 
     LazyColumn(
