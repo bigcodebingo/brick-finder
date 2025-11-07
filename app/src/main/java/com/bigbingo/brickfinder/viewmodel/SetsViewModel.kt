@@ -34,11 +34,7 @@ class SetsViewModel : ViewModel() {
     private val _setNumParts = MutableStateFlow<Int?>(null)
     val setNumParts: StateFlow<Int?> = _setNumParts
 
-    private val _setParts = MutableStateFlow<List<Triple<String, String?, Int>>>(emptyList())
-    val setParts: StateFlow<List<Triple<String, String?, Int>>> = _setParts
 
-    private val _setMinifigs = MutableStateFlow<List<Triple<String, String?, Int>>>(emptyList())
-    val setMinifigs: StateFlow<List<Triple<String, String?, Int>>> = _setMinifigs
 
     private val _setInventories = MutableStateFlow<List<SetInventory>>(emptyList())
     val setInventories: StateFlow<List<SetInventory>> = _setInventories

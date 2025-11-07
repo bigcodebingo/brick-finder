@@ -125,7 +125,9 @@ fun SetInfoScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Единый LazyVerticalGrid для деталей и минифигов
+                    val allParts = currentInventory.parts +
+                            currentInventory.minifigParts.map { Triple(it.first, it.second, it.third) }
+
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(5),
                         modifier = Modifier.fillMaxWidth(),
@@ -170,7 +172,7 @@ fun SetInfoScreen(
                                 Text(
                                     text = "Minifigs (total ${currentInventory.minifigs.sumOf { it.third }})",
                                     style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(vertical = 5.dp)
+                                    modifier = Modifier.padding(vertical = 8.dp)
                                 )
                             }
                             items(currentInventory.minifigs) { (figNum, imgUrl, qty) ->
@@ -188,6 +190,40 @@ fun SetInfoScreen(
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = figNum,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        maxLines = 1
+                                    )
+                                    Text(
+                                        text = "x$qty",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            }
+                        }
+
+                        if (currentInventory.minifigParts.isNotEmpty()) {
+                            item(span = { GridItemSpan(5) }) {
+                                Text(
+                                    text = "Minifig Parts (total ${currentInventory.minifigParts.sumOf { it.third }})",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+                            }
+                            items(currentInventory.minifigParts) { (partNum, imgUrl, qty) ->
+                                Column(
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .size(100.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    AsyncImage(
+                                        model = imgUrl,
+                                        contentDescription = partNum,
+                                        modifier = Modifier.size(60.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = partNum,
                                         style = MaterialTheme.typography.bodySmall,
                                         maxLines = 1
                                     )

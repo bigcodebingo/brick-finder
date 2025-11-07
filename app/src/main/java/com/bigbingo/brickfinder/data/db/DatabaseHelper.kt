@@ -367,6 +367,7 @@ object DatabaseHelper {
             "SELECT id, version FROM inventories WHERE set_num = ?",
             arrayOf(setNum)
         )
+
         while (invCursor.moveToNext()) {
             val invId = invCursor.getInt(0)
             val version = invCursor.getInt(1)
@@ -374,22 +375,26 @@ object DatabaseHelper {
             val parts = mutableListOf<Triple<String, String?, Int>>()
             val partCursor = db.rawQuery(
                 """
-            SELECT inventory_parts.part_num, inventory_parts.img_url, inventory_parts.quantity
+            SELECT part_num, img_url, quantity
             FROM inventory_parts
-            JOIN parts ON inventory_parts.part_num = parts.part_num
-            WHERE inventory_parts.inventory_id = ? AND (inventory_parts.is_spare IS NULL OR inventory_parts.is_spare = 0)
+            WHERE inventory_id = ? AND (is_spare IS NULL OR is_spare = 0)
             """,
                 arrayOf(invId.toString())
             )
             while (partCursor.moveToNext()) {
-                val partNum = partCursor.getString(0)
-                val imgUrl = partCursor.getString(1)
-                val qty = partCursor.getInt(2)
-                parts.add(Triple(partNum, imgUrl, qty))
+                parts.add(
+                    Triple(
+                        partCursor.getString(0),
+                        partCursor.getString(1),
+                        partCursor.getInt(2)
+                    )
+                )
             }
             partCursor.close()
 
             val minifigs = mutableListOf<Triple<String, String?, Int>>()
+            val minifigPartsTemp = mutableListOf<Triple<String, String?, Int>>()
+
             val figCursor = db.rawQuery(
                 """
             SELECT inventory_minifigs.fig_num, minifigs.img_url, inventory_minifigs.quantity
@@ -399,16 +404,51 @@ object DatabaseHelper {
             """,
                 arrayOf(invId.toString())
             )
+
             while (figCursor.moveToNext()) {
                 val figNum = figCursor.getString(0)
-                val imgUrl = figCursor.getString(1)
-                val qty = figCursor.getInt(2)
-                minifigs.add(Triple(figNum, imgUrl, qty))
+                val figImg = figCursor.getString(1)
+                val figQty = figCursor.getInt(2)
+                minifigs.add(Triple(figNum, figImg, figQty))
+
+                val figPartsCursor = db.rawQuery(
+                    """
+                SELECT inventory_parts.part_num, inventory_parts.img_url, inventory_parts.quantity
+                FROM inventory_parts
+                JOIN inventories ON inventory_parts.inventory_id = inventories.id
+                WHERE inventories.set_num = ?
+                  AND (inventory_parts.is_spare IS NULL OR inventory_parts.is_spare = 0)
+                """,
+                    arrayOf(figNum)
+                )
+
+                while (figPartsCursor.moveToNext()) {
+                    minifigPartsTemp.add(
+                        Triple(
+                            figPartsCursor.getString(0),
+                            figPartsCursor.getString(1),
+                            figPartsCursor.getInt(2) * figQty
+                        )
+                    )
+                }
+                figPartsCursor.close()
             }
             figCursor.close()
 
-            inventories.add(SetInventory(invId, version, parts, minifigs))
+            // Суммируем одинаковые детали
+            val minifigPartsMap = mutableMapOf<Pair<String, String?>, Int>()
+            for ((partNum, imgUrl, qty) in minifigPartsTemp) {
+                val key = partNum to imgUrl
+                minifigPartsMap[key] = (minifigPartsMap[key] ?: 0) + qty
+            }
+
+            val minifigParts = minifigPartsMap.map { (key, qty) ->
+                Triple(key.first, key.second, qty)
+            }
+
+            inventories.add(SetInventory(invId, version, parts, minifigs, minifigParts))
         }
+
         invCursor.close()
         db.close()
 
