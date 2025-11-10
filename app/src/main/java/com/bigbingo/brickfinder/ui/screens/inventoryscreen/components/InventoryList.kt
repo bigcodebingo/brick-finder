@@ -39,8 +39,6 @@ fun InventoryList(
             itemsIndexed(appearances) { index, appearance ->
                 val backgroundColor = if (index % 2 == 0) Color.White else Color(0xFFF5F5F5)
 
-                Log.d("InventoryList", "PartAppearance: set=${appearance.set.set_num}, color=${appearance.color.name}, qty=${appearance.quantity}")
-
                 InventoryCard(
                     set = appearance,
                     backgroundColor = backgroundColor,

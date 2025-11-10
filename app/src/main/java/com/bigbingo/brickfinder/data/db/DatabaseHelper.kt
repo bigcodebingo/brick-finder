@@ -15,6 +15,9 @@ import com.bigbingo.brickfinder.data.SetInventory
 
 object DatabaseHelper {
 
+    private const val DEFAULT_IMG_URL =
+        "https://cdn.rebrickable.com/media/thumbs/nil.png/85x85p.png?1662040927.7130826"
+
     fun getDatabase(context: Context, dbName: String = "brickfinder.db"): SQLiteDatabase {
         val dbFile = context.getDatabasePath(dbName)
         if (!dbFile.exists()) {
@@ -37,7 +40,7 @@ object DatabaseHelper {
             do {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
-                val imageUrl = cursor.getString(cursor.getColumnIndexOrThrow("imageUrl"))
+                val imageUrl = cursor.getString(cursor.getColumnIndexOrThrow("imageUrl")) ?: DEFAULT_IMG_URL
                 categories.add(PartCategory(id, name, imageUrl))
             } while (cursor.moveToNext())
         }
@@ -65,8 +68,8 @@ object DatabaseHelper {
 
         val partsList = mutableListOf<Part>()
         while (cursor.moveToNext()) {
-            val imageUrl = cursor.getString(4)
-                ?: "https://cdn.rebrickable.com/media/thumbs/nil.png/85x85p.png?1662040927.7130826"
+            val imageUrl = cursor.getString(4) ?: DEFAULT_IMG_URL
+
             partsList.add(
                 Part(
                     part_num = cursor.getString(0),
@@ -156,8 +159,8 @@ object DatabaseHelper {
 
         val setsList = mutableListOf<Set>()
         while (cursor.moveToNext()) {
-            val set_img_url = cursor.getString(5)
-                ?: "https://cdn.rebrickable.com/media/thumbs/nil.png/85x85p.png?1662040927.7130826"
+            val set_img_url = cursor.getString(5) ?: DEFAULT_IMG_URL
+
             setsList.add(
                 Set(
                     set_num = cursor.getString(0),
@@ -190,7 +193,7 @@ object DatabaseHelper {
                 name = cursor.getString(1),
                 part_cat_id = cursor.getInt(2),
                 part_url = cursor.getString(3),
-                part_img_url = cursor.getString(4),
+                part_img_url = cursor.getString(4) ?: DEFAULT_IMG_URL
             )
         }
         cursor.close()
@@ -292,7 +295,7 @@ object DatabaseHelper {
 
     fun getPartAppearancesInSets(context: Context, partNum: String, setNums: List<String>): List<PartAppearance> {
         if (setNums.isEmpty()) return emptyList()
-        val db = DatabaseHelper.getDatabase(context)
+        val db = getDatabase(context)
         val placeholders = setNums.joinToString(",") { "?" }
 
         val query = """
@@ -306,7 +309,6 @@ object DatabaseHelper {
         JOIN sets AS s ON s.set_num = COALESCE(inv_parent.set_num, inv.set_num)
         WHERE ip.part_num = ?
           AND COALESCE(inv_parent.set_num, inv.set_num) IN ($placeholders)
-          AND inv.version = 1
     """.trimIndent()
 
         val args = mutableListOf<String>().apply {
@@ -315,19 +317,19 @@ object DatabaseHelper {
         }
 
         val cursor = db.rawQuery(query, args.toTypedArray())
-        val tempData = mutableListOf<Pair<Set, Int>>() // <Set, colorId>
+        val tempData = mutableListOf<Pair<Set, Int>>()
         val colorIds = mutableSetOf<Int>()
 
         while (cursor.moveToNext()) {
+            val img = cursor.getString(5) ?: DEFAULT_IMG_URL
             val set = Set(
                 set_num = cursor.getString(0),
                 name = cursor.getString(1),
                 year = cursor.getInt(2),
                 theme_id = cursor.getString(3),
                 num_parts = cursor.getString(4),
-                set_img_url = cursor.getString(5)
+                set_img_url = img
             )
-
             val colorId = cursor.getInt(6)
             colorIds.add(colorId)
             tempData.add(set to colorId)
@@ -337,18 +339,17 @@ object DatabaseHelper {
         val colors = getColorsByIds(context, colorIds.toList())
         val colorMap = colors.associateBy { it.id }
 
-        val qtyMap = mutableMapOf<String, Int>()
+        val qtyMap = mutableMapOf<Pair<String, Int>, Int>()
 
         val queryParts = """
-        SELECT inv.set_num, SUM(ip.quantity) as total_qty
-        FROM inventories AS inv
-        JOIN inventory_parts AS ip ON ip.inventory_id = inv.id
+        SELECT inv.set_num, ip.color_id, ip.quantity
+        FROM inventory_parts AS ip
+        JOIN inventories AS inv ON ip.inventory_id = inv.id
         WHERE inv.set_num IN ($placeholders)
-          AND inv.version = 1
           AND ip.part_num = ?
-          AND (ip.is_spare IS NULL OR ip.is_spare = 0)
-        GROUP BY inv.set_num
-    """.trimIndent()
+          AND ip.is_spare = 0
+        GROUP BY inv.set_num, ip.color_id
+        """.trimIndent()
 
         val argsParts = mutableListOf<String>().apply {
             addAll(setNums)
@@ -358,22 +359,27 @@ object DatabaseHelper {
         val cursorParts = db.rawQuery(queryParts, argsParts.toTypedArray())
         while (cursorParts.moveToNext()) {
             val setNum = cursorParts.getString(0)
-            val qty = cursorParts.getInt(1)
-            qtyMap[setNum] = qty
+            val colorId = cursorParts.getInt(1)
+            val qty = cursorParts.getInt(2)
+            qtyMap[setNum to colorId] = qty
         }
         cursorParts.close()
 
         val queryMinifigs = """
-        SELECT inv.set_num, SUM(ip.quantity * imf.quantity) as total_qty
+        SELECT inv.set_num, ip.color_id, SUM(ip.quantity * imf.quantity) AS total_qty
         FROM inventories AS inv
         JOIN inventory_minifigs AS imf ON imf.inventory_id = inv.id
-        JOIN inventories AS figInv ON figInv.set_num = imf.fig_num AND figInv.version = 1
+        JOIN inventories AS figInv ON figInv.set_num = imf.fig_num
         JOIN inventory_parts AS ip ON ip.inventory_id = figInv.id
         WHERE inv.set_num IN ($placeholders)
-          AND inv.version = 1
           AND ip.part_num = ?
           AND (ip.is_spare IS NULL OR ip.is_spare = 0)
-        GROUP BY inv.set_num
+          AND inv.id = (
+              SELECT MIN(inv2.id)
+              FROM inventories AS inv2
+              WHERE inv2.set_num = inv.set_num
+          )
+        GROUP BY inv.set_num, ip.color_id
     """.trimIndent()
 
         val argsMinifigs = mutableListOf<String>().apply {
@@ -384,23 +390,20 @@ object DatabaseHelper {
         val cursorMinifigs = db.rawQuery(queryMinifigs, argsMinifigs.toTypedArray())
         while (cursorMinifigs.moveToNext()) {
             val setNum = cursorMinifigs.getString(0)
-            val qty = cursorMinifigs.getInt(1)
-            qtyMap[setNum] = (qtyMap[setNum] ?: 0) + qty
+            val colorId = cursorMinifigs.getInt(1)
+            val qty = cursorMinifigs.getInt(2)
+            qtyMap[setNum to colorId] = (qtyMap[setNum to colorId] ?: 0) + qty
         }
         cursorMinifigs.close()
         db.close()
 
         return tempData.mapNotNull { (set, colorId) ->
             val color = colorMap[colorId] ?: return@mapNotNull null
-            val totalQty = qtyMap[set.set_num] ?: 0
-            PartAppearance(
-                set = set,
-                quantity = totalQty,
-                color = color
-            )
+            val totalQty = qtyMap[set.set_num to colorId] ?: 0
+            PartAppearance(set = set, quantity = totalQty, color = color)
         }
-        .distinctBy { it.set.set_num to it.color.id }
-        .sortedBy { it.set.year }
+            .distinctBy { it.set.set_num to it.color.id }
+            .sortedBy { it.set.year }
     }
 
     fun getSetInfo(context: Context, setNum: String): SetInfo {
@@ -435,13 +438,10 @@ object DatabaseHelper {
                 arrayOf(invId.toString())
             )
             while (partCursor.moveToNext()) {
-                parts.add(
-                    Triple(
-                        partCursor.getString(0),
-                        partCursor.getString(1),
-                        partCursor.getInt(2)
-                    )
-                )
+                val img = partCursor.getString(1) ?: DEFAULT_IMG_URL
+
+                parts.add(Triple(partCursor.getString(0), img, partCursor.getInt(2)))
+
             }
             partCursor.close()
 
@@ -460,7 +460,7 @@ object DatabaseHelper {
 
             while (figCursor.moveToNext()) {
                 val figNum = figCursor.getString(0)
-                val figImg = figCursor.getString(1)
+                val figImg = figCursor.getString(1) ?: DEFAULT_IMG_URL
                 val figQty = figCursor.getInt(2)
                 minifigs.add(Triple(figNum, figImg, figQty))
 

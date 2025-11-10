@@ -42,20 +42,11 @@ fun InventoryScreen(
     val isFirstLoad = remember { mutableStateOf(true) }
 
     LaunchedEffect(part) {
-        Log.d("InventoryScreen", "Loading part appearances for partNum=${part.part_num}, setNums=$setNums")
-
         viewModel.loadPartAppearances(context, part.part_num, setNums)
     }
 
     LaunchedEffect(partAppearances) {
         if (partAppearances.isNotEmpty()) {
-            Log.d("InventoryScreen", "Loaded ${partAppearances.size} part appearances for partNum=${part.part_num}")
-            partAppearances.forEach { appearance ->
-                Log.d(
-                    "InventoryScreen",
-                    "Set=${appearance.set.set_num}, color=${appearance.color.name}, quantity=${appearance.quantity}"
-                )
-            }
             isFirstLoad.value = false
         }
     }
@@ -66,7 +57,6 @@ fun InventoryScreen(
         partAppearances
     }
 
-
     val categoryName = remember(part) {
         part.let { p ->
             DatabaseHelper.getPartCategories(context)
@@ -74,9 +64,9 @@ fun InventoryScreen(
         }
     }
 
-   /* if (isFirstLoad.value) {
+    if (isFirstLoad.value) {
         LoadingScreen()
-    } else {*/
+    } else {
         Scaffold(
             topBar = {
                 PartTopBar(
@@ -102,6 +92,6 @@ fun InventoryScreen(
                     onSetNumClick = onSetNumClick
                 )
             }
-
+        }
     }
 }
