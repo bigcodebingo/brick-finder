@@ -75,11 +75,13 @@ fun SetsThemeScreen(
         Scaffold(
             topBar = {
                 ThemeTopBar(
+
                     titleText = buildAnnotatedString {
+                        val plural = if (totalSets == 1) "set" else "sets"
                         append(themeName)
                         append(" ")
-                        withStyle(style = SpanStyle(fontSize = 14.sp, color = Color.Gray)) {
-                            append("($totalSets sets)")
+                        withStyle(style = SpanStyle(fontSize = 14.sp, color = Color.LightGray)) {
+                            append("($totalSets $plural)")
                         }
                     },
                     onBack = onBack
@@ -117,6 +119,3 @@ fun SetsThemeScreen(
         }
     }
 }
-
-
-

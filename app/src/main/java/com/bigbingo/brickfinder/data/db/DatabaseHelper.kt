@@ -2,7 +2,6 @@ package com.bigbingo.brickfinder.data.db
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import android.util.Log
 import com.bigbingo.brickfinder.data.PartColorCount
 import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.data.Part

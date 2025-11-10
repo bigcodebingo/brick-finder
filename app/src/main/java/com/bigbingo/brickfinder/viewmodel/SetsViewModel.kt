@@ -27,21 +27,22 @@ class SetsViewModel : ViewModel() {
     val totalSets: StateFlow<Int> = _totalSets
     private val _currentPage = MutableStateFlow(1)
     val currentPage: StateFlow<Int> = _currentPage
-
     private val _setYear = MutableStateFlow<Int?>(null)
     val setYear: StateFlow<Int?> = _setYear
-
     private val _setNumParts = MutableStateFlow<Int?>(null)
     val setNumParts: StateFlow<Int?> = _setNumParts
-
-
-
     private val _setInventories = MutableStateFlow<List<SetInventory>>(emptyList())
     val setInventories: StateFlow<List<SetInventory>> = _setInventories
 
     private val _selectedInventory = MutableStateFlow<SetInventory?>(null)
     val selectedInventory: StateFlow<SetInventory?> = _selectedInventory
 
+    fun clearSetInfo(){
+        _setYear.value = null
+        _setNumParts.value = null
+        _setInventories.value = emptyList()
+        _selectedInventory.value = null
+    }
     fun clearSets() {
         _sets.value = emptyList()
     }

@@ -188,7 +188,18 @@ fun MainContent(
                     onCategoryClick = { selectedIndex = 4 },
                     onPartNumClick = { selectedIndex = 7 },
                 )
-                8 -> SetInfoScreen(setNum = selectedSetNum, onBack = { selectedIndex = 6 })
+                8 -> SetInfoScreen(
+                    setNum = selectedSetNum,
+                    themeId = selectedThemeId ?: 0,
+                    onBack = { selectedIndex = 6 },
+                    onCatalogClick = { selectedIndex = 1 },
+                    onSetsClick = { selectedIndex = 5 },
+                    onThemeClick = { selectedIndex = 6 },
+                    onPartNumClick = { partNum ->
+                        selectedPartNum = partNum
+                        selectedIndex = 7
+                    }
+                )
                 9 -> selectedPart?.let { part ->
                     InventoryScreen(
                         part = part,

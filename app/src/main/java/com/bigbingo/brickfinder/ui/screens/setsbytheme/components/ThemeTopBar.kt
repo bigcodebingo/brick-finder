@@ -9,10 +9,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,12 +38,11 @@ fun ThemeTopBar(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         },
-        colors = TopAppBarColors(
-            containerColor = Color.White,
-            scrolledContainerColor = Color.White,
-            navigationIconContentColor = Color.Black,
-            titleContentColor = Color.Black,
-            actionIconContentColor = Color.Black
+        expandedHeight = 50.dp,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color(0xFF506070),
+            titleContentColor = Color.White,
+            navigationIconContentColor = Color.White
         )
     )
 }

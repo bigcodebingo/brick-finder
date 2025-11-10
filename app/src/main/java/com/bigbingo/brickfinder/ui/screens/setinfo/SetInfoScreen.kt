@@ -1,6 +1,7 @@
 package com.bigbingo.brickfinder.ui.screens.setinfo
 
 import android.content.Context
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,20 +39,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.bigbingo.brickfinder.data.db.DatabaseHelper
+import com.bigbingo.brickfinder.ui.screens.LoadingScreen
+import com.bigbingo.brickfinder.ui.screens.setinfo.components.SetTopBar
 import com.bigbingo.brickfinder.viewmodel.SetsViewModel
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetInfoScreen(
     setNum: String,
+    themeId: Int? = null,
     onBack: () -> Unit,
+    onCatalogClick: () -> Unit = {},
+    onSetsClick: () -> Unit = {},
+    onThemeClick: () -> Unit = {},
+    onPartNumClick: (String) -> Unit,
     viewModel: SetsViewModel = viewModel(),
     context: Context = LocalContext.current
 ) {
@@ -60,177 +70,190 @@ fun SetInfoScreen(
     val inventories by viewModel.setInventories.collectAsState()
     val selectedInventory by viewModel.selectedInventory.collectAsState()
 
+    val themeName = remember(setNum, themeId) {
+        themeId?.let { id ->
+            DatabaseHelper.getAllSetThemes(context).find { it.id == id }?.name
+        }
+    }
+
     LaunchedEffect(setNum) {
         viewModel.loadSetInfo(context, setNum)
     }
 
     val currentInventory = selectedInventory
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Set: $setNum") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            if ((year == null && numParts == null) || currentInventory == null) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp)
-                ) {
-                    // Информация о наборе
+    if ((year == null && numParts == null) || currentInventory == null) {
+        LoadingScreen()
+    } else {
+        Scaffold(
+            topBar = {
+                SetTopBar(
+                    setNum = setNum,
+                    themeName = themeName,
+                    onBack = {
+                        viewModel.clearSetInfo()
+                        onBack()
+                    },
+                    onCatalogClick = onCatalogClick,
+                    onSetsClick = onSetsClick,
+                    onThemeClick = onThemeClick,
+                    viewModel = viewModel
+                )
+            }
+        ) { padding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .fillMaxSize()
+                            .padding(8.dp)
                     ) {
-                        Text(
-                            text = "Year: ${year ?: "—"}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Number of parts: ${numParts ?: "—"}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Year: ${year ?: "—"}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Number of parts: ${numParts ?: "—"}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
 
-                        if (inventories.size > 1) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Button(onClick = {
-                                val currentIndex = inventories.indexOf(currentInventory)
-                                val nextIndex = (currentIndex + 1) % inventories.size
-                                viewModel.selectInventory(nextIndex)
-                            }) {
-                                Text("Inventory ${currentInventory.version} (Click to switch)")
+                            if (inventories.size > 1) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Button(onClick = {
+                                    val currentIndex = inventories.indexOf(currentInventory)
+                                    val nextIndex = (currentIndex + 1) % inventories.size
+                                    viewModel.selectInventory(nextIndex)
+                                }) {
+                                    Text("Inventory ${currentInventory.version} (Click to switch)")
+                                }
+                            } else {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("Inventory ${currentInventory.version}")
                             }
-                        } else {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Inventory ${currentInventory.version}")
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    val allParts = currentInventory.parts +
-                            currentInventory.minifigParts.map { Triple(it.first, it.second, it.third) }
-
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(5),
-                        modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(8.dp)
-                    ) {
-                        if (currentInventory.parts.isNotEmpty()) {
-                            item(span = { GridItemSpan(5) }) {
-                                Text(
-                                    text = "Parts (total ${currentInventory.parts.sumOf { it.third }})",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(vertical = 8.dp)
-                                )
-                            }
-                            items(currentInventory.parts) { (partNum, imgUrl, qty) ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(4.dp)
-                                        .size(100.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    AsyncImage(
-                                        model = imgUrl,
-                                        contentDescription = partNum,
-                                        modifier = Modifier.size(60.dp)
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(5),
+                            modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(8.dp)
+                        ) {
+                            if (currentInventory.parts.isNotEmpty()) {
+                                item(span = { GridItemSpan(5) }) {
                                     Text(
-                                        text = partNum,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        maxLines = 1
-                                    )
-                                    Text(
-                                        text = "x$qty",
-                                        style = MaterialTheme.typography.bodySmall
+                                        text = "Parts (total ${currentInventory.parts.sumOf { it.third }})",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.padding(vertical = 8.dp)
                                     )
                                 }
-                            }
-                        }
-
-                        if (currentInventory.minifigs.isNotEmpty()) {
-                            item(span = { GridItemSpan(5) }) {
-                                Text(
-                                    text = "Minifigs (total ${currentInventory.minifigs.sumOf { it.third }})",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(vertical = 8.dp)
-                                )
-                            }
-                            items(currentInventory.minifigs) { (figNum, imgUrl, qty) ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(4.dp)
-                                        .size(100.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    AsyncImage(
-                                        model = imgUrl,
-                                        contentDescription = figNum,
-                                        modifier = Modifier.size(60.dp)
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = figNum,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        maxLines = 1
-                                    )
-                                    Text(
-                                        text = "x$qty",
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
+                                items(currentInventory.parts) { (partNum, imgUrl, qty) ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(4.dp)
+                                            .size(100.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        AsyncImage(
+                                            model = imgUrl,
+                                            contentDescription = partNum,
+                                            modifier = Modifier.size(60.dp)
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = partNum,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            maxLines = 1,
+                                            color = Color(0xFF1565C0),
+                                            overflow = TextOverflow.Ellipsis,
+                                            textDecoration = TextDecoration.Underline,                                            modifier = Modifier.clickable { onPartNumClick(partNum) }
+                                        )
+                                        Text(
+                                            text = "x$qty",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
                                 }
                             }
-                        }
 
-                        if (currentInventory.minifigParts.isNotEmpty()) {
-                            item(span = { GridItemSpan(5) }) {
-                                Text(
-                                    text = "Minifig Parts (total ${currentInventory.minifigParts.sumOf { it.third }})",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(vertical = 8.dp)
-                                )
+                            if (currentInventory.minifigs.isNotEmpty()) {
+                                item(span = { GridItemSpan(5) }) {
+                                    Text(
+                                        text = "Minifigs (total ${currentInventory.minifigs.sumOf { it.third }})",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.padding(vertical = 8.dp)
+                                    )
+                                }
+                                items(currentInventory.minifigs) { (figNum, imgUrl, qty) ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(4.dp)
+                                            .size(100.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        AsyncImage(
+                                            model = imgUrl,
+                                            contentDescription = figNum,
+                                            modifier = Modifier.size(60.dp)
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = figNum,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            maxLines = 1
+                                        )
+                                        Text(
+                                            text = "x$qty",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                }
                             }
-                            items(currentInventory.minifigParts) { (partNum, imgUrl, qty) ->
-                                Column(
-                                    modifier = Modifier
-                                        .padding(4.dp)
-                                        .size(100.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    AsyncImage(
-                                        model = imgUrl,
-                                        contentDescription = partNum,
-                                        modifier = Modifier.size(60.dp)
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
+
+                            if (currentInventory.minifigParts.isNotEmpty()) {
+                                item(span = { GridItemSpan(5) }) {
                                     Text(
-                                        text = partNum,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        maxLines = 1
+                                        text = "Minifig Parts (total ${currentInventory.minifigParts.sumOf { it.third }})",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.padding(vertical = 8.dp)
                                     )
-                                    Text(
-                                        text = "x$qty",
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
+                                }
+                                items(currentInventory.minifigParts) { (partNum, imgUrl, qty) ->
+                                    Column(
+                                        modifier = Modifier
+                                            .padding(4.dp)
+                                            .size(100.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        AsyncImage(
+                                            model = imgUrl,
+                                            contentDescription = partNum,
+                                            modifier = Modifier.size(60.dp)
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = partNum,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            maxLines = 1,
+                                            color = Color(0xFF1565C0),
+                                            overflow = TextOverflow.Ellipsis,
+                                            textDecoration = TextDecoration.Underline,                                            modifier = Modifier.clickable { onPartNumClick(partNum) },
+                                        )
+                                        Text(
+                                            text = "x$qty",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -238,5 +261,4 @@ fun SetInfoScreen(
                 }
             }
         }
-    }
 }
