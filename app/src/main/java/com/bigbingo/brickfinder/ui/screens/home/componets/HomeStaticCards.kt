@@ -18,9 +18,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.res.painterResource
 import com.bigbingo.brickfinder.R
+import com.bigbingo.brickfinder.ui.screens.Screen
 
 @Composable
-fun HomeStaticCards(onNavigate: (Int) -> Unit) {
+fun HomeStaticCards(onNavigate: (Screen) -> Unit)  {
     val colors = MaterialTheme.colorScheme
 
     Row(
@@ -32,7 +33,7 @@ fun HomeStaticCards(onNavigate: (Int) -> Unit) {
             modifier = Modifier
                 .weight(1f)
                 .height(180.dp)
-                .clickable { onNavigate(3) },
+                .clickable { onNavigate(Screen.Parts) },
             colors = CardDefaults.cardColors(containerColor = colors.surface),
             shape = RoundedCornerShape(0.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
@@ -80,7 +81,7 @@ fun HomeStaticCards(onNavigate: (Int) -> Unit) {
             modifier = Modifier
                 .weight(1f)
                 .height(180.dp)
-                .clickable { onNavigate(5) },
+                .clickable { onNavigate(Screen.SetsCatalog) },
             colors = CardDefaults.cardColors(containerColor = colors.surface),
             shape = RoundedCornerShape(0.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)

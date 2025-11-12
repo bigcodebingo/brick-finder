@@ -31,7 +31,7 @@ fun InventoryScreen(
     onBack: () -> Unit,
     onCatalogClick: () -> Unit,
     onPartsClick: () -> Unit,
-    onCategoryClick: () -> Unit,
+    onCategoryClick: (Int) -> Unit,
     onPartNumClick: () -> Unit,
     onSetNumClick: (String) -> Unit,
     viewModel: PartsViewModel = viewModel(),
@@ -75,7 +75,11 @@ fun InventoryScreen(
                     onBack = onBack,
                     onCatalogClick = onCatalogClick,
                     onPartsClick = onPartsClick,
-                    onCategoryClick = onCategoryClick,
+                    onCategoryClick = {
+                        part.part_cat_id.let { id ->
+                            onCategoryClick(id)
+                        }
+                    },
                     onPartNumClick = onPartNumClick,
                     viewModel = viewModel
                 )

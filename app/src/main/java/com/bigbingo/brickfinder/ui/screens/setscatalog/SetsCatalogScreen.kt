@@ -18,7 +18,7 @@ import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SetsScreen(
+fun SetsCatalogScreen(
     viewModel: SetsViewModel = viewModel(),
     onBack: () -> Unit,
     onParentClick: (Int) -> Unit = {},

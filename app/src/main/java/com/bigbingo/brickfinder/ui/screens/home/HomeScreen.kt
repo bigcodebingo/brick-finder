@@ -6,13 +6,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.bigbingo.brickfinder.ui.screens.Screen
 import com.bigbingo.brickfinder.ui.screens.home.componets.HomeStaticCards
 import com.bigbingo.brickfinder.ui.screens.homepage.componets.SearchField
 
 @Composable
 fun HomeScreen(
     modifier: Modifier,
-    onNavigate: (Int) -> Unit
+    onNavigate: (Screen) -> Unit
 ) {
 
     var searchQuery by remember { mutableStateOf("") }

@@ -14,15 +14,19 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.bigbingo.brickfinder.data.PartAppearance
+import com.bigbingo.brickfinder.viewmodel.PartsViewModel
+import com.bigbingo.brickfinder.viewmodel.SetsViewModel
 
 @Composable
 
 fun InventoryCard(
     set: PartAppearance,
     backgroundColor: Color,
-    onSetNumClick: (String) -> Unit
+    onSetNumClick: (String) -> Unit,
+    setsViewModel: SetsViewModel = viewModel(),
 ) {
     Card(
         modifier = Modifier
@@ -61,7 +65,10 @@ fun InventoryCard(
                     textDecoration = TextDecoration.Underline,
                     color = Color(0xFF1565C0),
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.clickable { onSetNumClick(set.set.set_num) }
+                    modifier = Modifier.clickable {
+                        setsViewModel.clearSetInfo()
+                        setsViewModel.clearSets()
+                        onSetNumClick(set.set.set_num) }
                 )
             }
             Spacer(modifier = Modifier.weight(1f))

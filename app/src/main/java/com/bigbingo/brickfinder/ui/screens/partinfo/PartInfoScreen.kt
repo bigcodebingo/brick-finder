@@ -1,5 +1,6 @@
 package com.bigbingo.brickfinder.ui.screens.partinfo
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,7 +10,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -35,7 +38,7 @@ fun PartInfoScreen(
     onBack: () -> Unit,
     onCatalogClick: () -> Unit,
     onPartsClick: () -> Unit,
-    onCategoryClick: () -> Unit,
+    onCategoryClick: (Int) -> Unit,
     onPartNumClick: () -> Unit,
     onSetsClick: (Part, List<String>) -> Unit,
     onColorClick: (Part, List<String>, PartColor) -> Unit,
@@ -52,6 +55,7 @@ fun PartInfoScreen(
                 .find { it.id == p.part_cat_id }?.name
         }
     }
+
 
     val isFirstLoad = remember { mutableStateOf(true) }
 
@@ -74,6 +78,7 @@ fun PartInfoScreen(
         Scaffold(
             topBar = {
                 PartTopBar(
+
                     partNum = part?.part_num,
                     categoryName = categoryName,
                     onBack = {
@@ -83,7 +88,13 @@ fun PartInfoScreen(
                     },
                     onCatalogClick = onCatalogClick,
                     onPartsClick = onPartsClick,
-                    onCategoryClick = onCategoryClick,
+
+                    onCategoryClick = {
+                        part?.part_cat_id?.let { id ->
+                            Log.d("PartTopBarDebug", "onCategoryClick called with categoryId = $id, partNum = ${part!!.part_num}")
+                            onCategoryClick(id)
+                        } ?: Log.d("PartTopBarDebug", "onCategoryClick: part or part_cat_id is null")
+                    },
                     onPartNumClick = onPartNumClick,
                     viewModel = viewModel,
                     showInSets = false
@@ -92,6 +103,9 @@ fun PartInfoScreen(
             containerColor = Color.White
         ) { innerPadding ->
             part?.let { p ->
+                val isDefaultImage = p.part_img_url ==
+                        "https://cdn.rebrickable.com/media/thumbs/nil.png/85x85p.png?1662040927.7130826"
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -116,9 +130,7 @@ fun PartInfoScreen(
                         lineHeight = 18.sp
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    AsyncImage(
-                        model = p.part_img_url,
-                        contentDescription = p.name,
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .fillMaxHeight(0.35f)
@@ -127,8 +139,18 @@ fun PartInfoScreen(
                                 color = Color(0xFFCCCCCC),
                                 shape = RoundedCornerShape(12.dp)
                             )
-                            .padding(all = 5.dp),
-                    )
+                            .padding(5.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AsyncImage(
+                            model = p.part_img_url,
+                            contentDescription = p.name,
+                            modifier = Modifier
+                                .size(if (isDefaultImage) 80.dp else 200.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = buildAnnotatedString {

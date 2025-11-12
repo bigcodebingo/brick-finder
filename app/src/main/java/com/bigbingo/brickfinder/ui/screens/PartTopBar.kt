@@ -15,7 +15,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
+import com.bigbingo.brickfinder.viewmodel.SetsViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,7 +31,8 @@ fun PartTopBar(
     onCategoryClick: () -> Unit,
     onPartNumClick: () -> Unit,
     showInSets: Boolean = true,
-    viewModel: PartsViewModel? = null
+    viewModel: PartsViewModel? = null,
+    setsViewModel: SetsViewModel = viewModel()
 ) {
     TopAppBar(
         title = {
@@ -49,6 +52,7 @@ fun PartTopBar(
                         viewModel?.clearParts()
                         viewModel?.resetCurrentPage()
                         viewModel?.clearPartAppearances()
+                        setsViewModel.clearSetInfo()
                     }
                 )
                 Spacer(modifier = Modifier.width(6.dp))

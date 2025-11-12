@@ -1,6 +1,7 @@
 package com.bigbingo.brickfinder.ui.screens.setinfo
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,8 +49,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.bigbingo.brickfinder.data.db.DatabaseHelper
+import com.bigbingo.brickfinder.data.db.DatabaseHelper.getThemeIdBySetNum
 import com.bigbingo.brickfinder.ui.screens.LoadingScreen
+import com.bigbingo.brickfinder.ui.screens.Screen
 import com.bigbingo.brickfinder.ui.screens.setinfo.components.SetTopBar
+import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 import com.bigbingo.brickfinder.viewmodel.SetsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,9 +64,10 @@ fun SetInfoScreen(
     onBack: () -> Unit,
     onCatalogClick: () -> Unit = {},
     onSetsClick: () -> Unit = {},
-    onThemeClick: () -> Unit = {},
+    onThemeClick: (Int) -> Unit,
     onPartNumClick: (String) -> Unit,
     viewModel: SetsViewModel = viewModel(),
+    partViewModel: PartsViewModel = viewModel(),
     context: Context = LocalContext.current
 ) {
     val year by viewModel.setYear.collectAsState()
@@ -70,8 +75,12 @@ fun SetInfoScreen(
     val inventories by viewModel.setInventories.collectAsState()
     val selectedInventory by viewModel.selectedInventory.collectAsState()
 
-    val themeName = remember(setNum, themeId) {
-        themeId?.let { id ->
+    val resolvedThemeId = remember(setNum, themeId) {
+        themeId ?: getThemeIdBySetNum(context, setNum)
+    }
+
+    val themeName = remember(resolvedThemeId) {
+        resolvedThemeId?.let { id ->
             DatabaseHelper.getAllSetThemes(context).find { it.id == id }?.name
         }
     }
@@ -96,7 +105,11 @@ fun SetInfoScreen(
                     },
                     onCatalogClick = onCatalogClick,
                     onSetsClick = onSetsClick,
-                    onThemeClick = onThemeClick,
+                    onThemeClick = {
+                        resolvedThemeId?.let { id ->
+                            onThemeClick(id)
+                        }
+                    },
                     viewModel = viewModel
                 )
             }
@@ -165,6 +178,7 @@ fun SetInfoScreen(
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         AsyncImage(
+
                                             model = imgUrl,
                                             contentDescription = partNum,
                                             modifier = Modifier.size(60.dp)
@@ -176,7 +190,12 @@ fun SetInfoScreen(
                                             maxLines = 1,
                                             color = Color(0xFF1565C0),
                                             overflow = TextOverflow.Ellipsis,
-                                            textDecoration = TextDecoration.Underline,                                            modifier = Modifier.clickable { onPartNumClick(partNum) }
+                                            textDecoration = TextDecoration.Underline,
+                                            modifier = Modifier.clickable {
+                                                partViewModel.clearPart()
+                                                partViewModel.clearParts()
+                                                onPartNumClick(partNum)
+                                            }
                                         )
                                         Text(
                                             text = "x$qty",
@@ -210,6 +229,7 @@ fun SetInfoScreen(
                                         Text(
                                             text = figNum,
                                             style = MaterialTheme.typography.bodySmall,
+                                            overflow = TextOverflow.Ellipsis,
                                             maxLines = 1
                                         )
                                         Text(

@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 import com.bigbingo.brickfinder.viewmodel.SetsViewModel
 import kotlin.text.dropLast
 
@@ -33,7 +35,8 @@ fun SetTopBar(
     onCatalogClick: () -> Unit,
     onSetsClick: () -> Unit,
     onThemeClick: () -> Unit,
-    viewModel: SetsViewModel? = null
+    viewModel: SetsViewModel? = null,
+    partsViewModel: PartsViewModel = viewModel()
 ) {
     TopAppBar(
         title = {
@@ -52,6 +55,8 @@ fun SetTopBar(
                         viewModel?.clearSetInfo()
                         viewModel?.clearSets()
                         viewModel?.resetCurrentPage()
+                        partsViewModel.clearPart()
+                        partsViewModel.clearParts()
                     }
                 )
                 Spacer(modifier = Modifier.width(6.dp))

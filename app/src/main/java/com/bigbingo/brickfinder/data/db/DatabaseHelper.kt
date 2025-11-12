@@ -67,7 +67,8 @@ object DatabaseHelper {
 
         val partsList = mutableListOf<Part>()
         while (cursor.moveToNext()) {
-            val imageUrl = cursor.getString(4) ?: DEFAULT_IMG_URL
+            val rawImg = cursor.getString(4)
+            val imageUrl = if (rawImg.isNullOrBlank()) DEFAULT_IMG_URL else rawImg
 
             partsList.add(
                 Part(
@@ -103,6 +104,22 @@ object DatabaseHelper {
         cursor.close()
         db.close()
         return themes
+    }
+
+    fun getThemeIdBySetNum(context: Context, setNum: String): Int? {
+        val db = getDatabase(context)
+        val cursor = db.rawQuery(
+            "SELECT theme_id FROM sets WHERE set_num = ?",
+            arrayOf(setNum)
+        )
+        val themeId = if (cursor.moveToFirst()) {
+            if (cursor.isNull(0)) null else cursor.getInt(0)
+        } else {
+            null
+        }
+        cursor.close()
+        db.close()
+        return themeId
     }
 
     fun getSetsPage(context: Context, themeId: Int?, offset: Int, limit: Int): Pair<List<Set>, Int> {
@@ -158,7 +175,8 @@ object DatabaseHelper {
 
         val setsList = mutableListOf<Set>()
         while (cursor.moveToNext()) {
-            val set_img_url = cursor.getString(5) ?: DEFAULT_IMG_URL
+            val rawImg = cursor.getString(5)
+            val set_img_url = if (rawImg.isNullOrBlank()) DEFAULT_IMG_URL else rawImg
 
             setsList.add(
                 Set(
@@ -320,7 +338,9 @@ object DatabaseHelper {
         val colorIds = mutableSetOf<Int>()
 
         while (cursor.moveToNext()) {
-            val img = cursor.getString(5) ?: DEFAULT_IMG_URL
+            val rawImg = cursor.getString(5)
+            val img = if (rawImg.isNullOrBlank()) DEFAULT_IMG_URL else rawImg
+
             val set = Set(
                 set_num = cursor.getString(0),
                 name = cursor.getString(1),
@@ -437,7 +457,8 @@ object DatabaseHelper {
                 arrayOf(invId.toString())
             )
             while (partCursor.moveToNext()) {
-                val img = partCursor.getString(1) ?: DEFAULT_IMG_URL
+                val rawImg = partCursor.getString(1)
+                val img = if (rawImg.isNullOrBlank()) DEFAULT_IMG_URL else rawImg
 
                 parts.add(Triple(partCursor.getString(0), img, partCursor.getInt(2)))
 
@@ -459,7 +480,8 @@ object DatabaseHelper {
 
             while (figCursor.moveToNext()) {
                 val figNum = figCursor.getString(0)
-                val figImg = figCursor.getString(1) ?: DEFAULT_IMG_URL
+                val rawFigImg = figCursor.getString(1)
+                val figImg = if (rawFigImg.isNullOrBlank()) DEFAULT_IMG_URL else rawFigImg
                 val figQty = figCursor.getInt(2)
                 minifigs.add(Triple(figNum, figImg, figQty))
 
