@@ -184,7 +184,7 @@ object DatabaseHelper {
                     name = cursor.getString(1),
                     year = cursor.getInt(2),
                     theme_id = cursor.getString(3),
-                    num_parts = cursor.getString(4),
+                    num_parts = cursor.getInt(4),
                     set_img_url = set_img_url,
                     set_url = cursor.getString(6)
                 )
@@ -346,7 +346,7 @@ object DatabaseHelper {
                 name = cursor.getString(1),
                 year = cursor.getInt(2),
                 theme_id = cursor.getString(3),
-                num_parts = cursor.getString(4),
+                num_parts = cursor.getInt(4),
                 set_img_url = img
             )
             val colorId = cursor.getInt(6)
@@ -429,12 +429,14 @@ object DatabaseHelper {
         val db = getDatabase(context)
 
         val setCursor = db.rawQuery(
-            "SELECT year, num_parts FROM sets WHERE set_num = ?",
+            "SELECT year, num_parts, set_img_url FROM sets WHERE set_num = ?",
             arrayOf(setNum)
         )
         if (!setCursor.moveToFirst()) throw Exception("Set not found: $setNum")
         val year = setCursor.getInt(0)
         val numParts = setCursor.getInt(1)
+        val rawImg = setCursor.getString(2)
+        val imgUrl = if (rawImg.isNullOrBlank()) DEFAULT_IMG_URL else rawImg
         setCursor.close()
 
         val inventories = mutableListOf<SetInventory>()
@@ -525,6 +527,6 @@ object DatabaseHelper {
         invCursor.close()
         db.close()
 
-        return SetInfo(setNum, year, numParts, inventories)
+        return SetInfo(setNum, year, numParts, inventories, imgUrl)
     }
 }

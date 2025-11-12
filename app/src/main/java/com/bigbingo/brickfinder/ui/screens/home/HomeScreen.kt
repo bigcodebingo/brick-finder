@@ -9,11 +9,12 @@ import androidx.compose.ui.unit.dp
 import com.bigbingo.brickfinder.ui.screens.Screen
 import com.bigbingo.brickfinder.ui.screens.home.componets.HomeStaticCards
 import com.bigbingo.brickfinder.ui.screens.homepage.componets.SearchField
+import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 
 @Composable
 fun HomeScreen(
     modifier: Modifier,
-    onNavigate: (Screen) -> Unit
+    onNavigate: (Screen) -> Unit,
 ) {
 
     var searchQuery by remember { mutableStateOf("") }

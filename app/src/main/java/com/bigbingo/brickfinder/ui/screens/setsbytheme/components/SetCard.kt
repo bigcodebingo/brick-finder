@@ -55,10 +55,12 @@ fun SetCard(
                     fontSize = 11.sp,
                     lineHeight = 14.sp,
                     maxLines = 1,
-                    color = Color(0xFF1565C0),
-                    overflow = TextOverflow.Ellipsis,
+                    color = if ((set.num_parts ?: 0) > 0) Color(0xFF1565C0) else Color.Gray,                    overflow = TextOverflow.Ellipsis,
                     textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.clickable { onClick() }
+                    modifier = Modifier.clickable(
+                        enabled = (set.num_parts ?: 0) > 0,
+                        onClick = { onClick() }
+                    )
                 )
             }
             Spacer(modifier = Modifier.width(30.dp))

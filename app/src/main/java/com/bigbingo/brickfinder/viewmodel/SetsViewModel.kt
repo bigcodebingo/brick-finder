@@ -1,6 +1,7 @@
 package com.bigbingo.brickfinder.viewmodel
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bigbingo.brickfinder.data.Part
@@ -36,6 +37,8 @@ class SetsViewModel : ViewModel() {
 
     private val _selectedInventory = MutableStateFlow<SetInventory?>(null)
     val selectedInventory: StateFlow<SetInventory?> = _selectedInventory
+    private val _setImageUrl = MutableStateFlow<String?>(null)
+    val setImageUrl: StateFlow<String?> = _setImageUrl
 
     fun clearSetInfo(){
         _setYear.value = null
@@ -109,6 +112,7 @@ class SetsViewModel : ViewModel() {
                 _setNumParts.value = info.totalParts
                 _setInventories.value = info.inventories
                 _selectedInventory.value = info.inventories.firstOrNull()
+                _setImageUrl.value = info.imgUrl
             }
         }
     }

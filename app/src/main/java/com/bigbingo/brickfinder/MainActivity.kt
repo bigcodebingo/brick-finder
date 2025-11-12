@@ -25,8 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.bigbingo.brickfinder.data.Part
-import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.ui.screens.Screen
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.PartsByCategoryScreen
 import com.bigbingo.brickfinder.ui.screens.home.HomeScreen
@@ -39,6 +37,7 @@ import com.bigbingo.brickfinder.ui.screens.setsbytheme.SetsThemeScreen
 import com.bigbingo.brickfinder.ui.screens.setscatalog.SetsCatalogScreen
 import com.bigbingo.brickfinder.ui.theme.BrickFinderTheme
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
+import com.bigbingo.brickfinder.viewmodel.SetsViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,20 +112,31 @@ fun BottomNavigationBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
 @Composable
 fun MainContent(
     isDarkTheme: Boolean,
-    onToggleTheme: () -> Unit
+    onToggleTheme: () -> Unit,
 ) {
-    val navStack = remember { mutableStateListOf<Screen>(Screen.Catalog) }
+    val navStack = remember { mutableStateListOf<Screen>(Screen.Home) }
+
+    val partViewModel: PartsViewModel = viewModel()
+    val setsViewModel: SetsViewModel = viewModel()
 
     fun navigateTo(screen: Screen) {
         navStack.add(screen)
     }
 
     fun popBackStack() {
-        if (navStack.size > 1) navStack.removeAt(navStack.lastIndex)
+        if (navStack.size > 1) {
+            navStack.removeAt(navStack.lastIndex)
+            val current = navStack.lastOrNull()
+            if (current is Screen.Home || current is Screen.WantedList) {
+                partViewModel.clearPart()
+                setsViewModel.clearSetInfo()
+            }
+        }
     }
 
     val currentScreen = navStack.last()
-    val showBottomBar = currentScreen is Screen.WantedList || currentScreen is Screen.Catalog
+    val showBottomBar = currentScreen is Screen.WantedList || currentScreen is Screen.Home
+            || currentScreen is Screen.Account
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -135,7 +145,7 @@ fun MainContent(
                 BottomNavigationBar(
                     selectedIndex = when (currentScreen) {
                         is Screen.WantedList -> 0
-                        is Screen.Catalog -> 1
+                        is Screen.Home -> 1
                         is Screen.Account -> 2
                         else -> 1
                     }
@@ -147,7 +157,7 @@ fun MainContent(
                         }
                         1 -> {
                             navStack.clear()
-                            navStack.add(Screen.Catalog)
+                            navStack.add(Screen.Home)
                         }
                         2 -> {
                             navStack.clear()
@@ -161,7 +171,7 @@ fun MainContent(
         Box(modifier = Modifier.fillMaxSize()) {
             when (val screen = currentScreen) {
                 is Screen.WantedList -> HomeScreen(Modifier.padding(innerPadding)) { navigateTo(it) }
-                is Screen.Catalog -> HomeScreen(Modifier.padding(innerPadding)) { navigateTo(it) }
+                is Screen.Home -> HomeScreen(Modifier.padding(innerPadding)) { navigateTo(it) }
                 is Screen.Parts -> PartScreen(
                     onCategoryClick = { navigateTo(Screen.PartsByCategory(it)) },
                     onBack = { popBackStack() }
@@ -174,7 +184,7 @@ fun MainContent(
                 is Screen.PartInfo -> PartInfoScreen(
                     partNum = screen.partNum,
                     onBack = { navStack.removeAt(navStack.lastIndex) },
-                    onCatalogClick = { navStack.clear(); navStack.add(Screen.Catalog) },
+                    onCatalogClick = { navStack.clear(); navStack.add(Screen.Home) },
                     onPartsClick = { navStack.add(Screen.Parts) },
                     onCategoryClick = { categoryId ->
                         navStack.add(Screen.PartsByCategory(categoryId))
@@ -200,7 +210,7 @@ fun MainContent(
                     onBack = { navStack.removeAt(navStack.lastIndex) },
                     onCatalogClick = {
                         navStack.clear()
-                        navStack.add(Screen.Catalog)
+                        navStack.add(Screen.Home)
                     },
                     onPartsClick = { navStack.add(Screen.Parts) },
                     onCategoryClick = { categoryId ->
@@ -217,7 +227,7 @@ fun MainContent(
                     onBack = { navStack.removeAt(navStack.lastIndex) },
                     onParentClick = { parentId -> navStack.add(Screen.SetsTheme(parentId)) },
                     onChildClick = { childId -> navStack.add(Screen.SetsTheme(childId)) },
-                    onSearchNavigate = { searchId ->  }
+                    onSearchNavigate = { searchId -> navStack.add(Screen.SetsTheme(searchId)) }
                 )
                 is Screen.SetsTheme -> SetsThemeScreen(
                     themeId = screen.themeId,
@@ -227,7 +237,7 @@ fun MainContent(
                     setNum = screen.setNum,
                     themeId = screen.themeId,
                     onBack = { popBackStack() },
-                    onCatalogClick = { navStack.clear(); navStack.add(Screen.Catalog) },
+                    onCatalogClick = { navStack.clear(); navStack.add(Screen.Home) },
                     onSetsClick = { navigateTo(Screen.SetsCatalog) },
                     onThemeClick = { themeId -> navStack.add(Screen.SetsTheme(themeId)) },
                     onPartNumClick = { navigateTo(Screen.PartInfo(it)) }

@@ -5,7 +5,7 @@ data class Set (
     val name: String,
     val year: Int,
     val theme_id: String? = null,
-    val num_parts: String? = null,
+    val num_parts: Int? = null,
     val set_img_url: String? = null,
     val set_url: String? = null
 )

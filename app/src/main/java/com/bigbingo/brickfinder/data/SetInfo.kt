@@ -12,5 +12,6 @@ data class SetInfo(
     val setNum: String,
     val year: Int,
     val totalParts: Int,
-    val inventories: List<SetInventory>
+    val inventories: List<SetInventory>,
+    val imgUrl: String
 )

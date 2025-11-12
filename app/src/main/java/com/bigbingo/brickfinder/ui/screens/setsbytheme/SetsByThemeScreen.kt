@@ -80,7 +80,7 @@ fun SetsThemeScreen(
                         val plural = if (totalSets == 1) "set" else "sets"
                         append(themeName)
                         append(" ")
-                        withStyle(style = SpanStyle(fontSize = 14.sp, color = Color.LightGray)) {
+                        withStyle(style = SpanStyle(fontSize = 13.sp, color = Color.LightGray)) {
                             append("($totalSets $plural)")
                         }
                     },
@@ -103,7 +103,7 @@ fun SetsThemeScreen(
                     onPageChange = { page -> viewModel.setCurrentPage(page) },
                     modifier = Modifier
                         .weight(1f)
-                        .padding(top = 105.dp)
+                        .padding(top = 95.dp)
                 )
 
                 if (sets.size < 9 && sets.isNotEmpty()) {

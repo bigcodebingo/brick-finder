@@ -29,7 +29,7 @@ fun ThemeTopBar(
                 text = titleText,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.bodyLarge,
-                fontSize = 17.sp
+                fontSize = 16.sp
             )
         },
 
