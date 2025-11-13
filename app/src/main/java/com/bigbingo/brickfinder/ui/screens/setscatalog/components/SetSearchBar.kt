@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar(
+fun SetSearchBar(
     value: String,
     onValueChange: (String) -> Unit,
     onSearch: () -> Unit = {}

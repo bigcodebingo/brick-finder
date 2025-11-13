@@ -12,8 +12,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.ui.screens.setscatalog.components.SetsTopBar
 import com.bigbingo.brickfinder.ui.screens.setscatalog.components.ThemeList
 import com.bigbingo.brickfinder.viewmodel.SetsViewModel
-import com.bigbingo.brickfinder.ui.screens.setscatalog.components.SearchBar
 import com.bigbingo.brickfinder.ui.screens.setscatalog.components.SearchResult
+import com.bigbingo.brickfinder.ui.screens.setscatalog.components.SetSearchBar
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,23 +73,23 @@ fun SetsCatalogScreen(
                 onChildClick = onChildClick,
                 modifier = Modifier
                     .fillMaxSize()
-                    .zIndex(0f)
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)
-                    .zIndex(1f)
             ) {
-                SearchBar(
+                SetSearchBar(
                     value = searchQuery,
                     onValueChange = {
                         searchQuery = it
                         isDropdownVisible = it.isNotBlank()
                     },
                     onSearch = {
-                        onSearchNavigate(selectedThemeId!!)
+                        selectedThemeId?.let { themeId ->
+                            onSearchNavigate(themeId)
+                        }
                         isDropdownVisible = false
                     }
                 )
@@ -108,12 +108,10 @@ fun SetsCatalogScreen(
                                 searchQuery = displayName
                                 selectedThemeId = theme.id
                                 isDropdownVisible = false
-
                                 navigateToThemeId = theme.id
-
                             }
                         },
-                        modifier = Modifier.zIndex(2f)
+
                     )
                 }
 

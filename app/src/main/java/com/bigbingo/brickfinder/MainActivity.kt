@@ -170,8 +170,14 @@ fun MainContent(
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
             when (val screen = currentScreen) {
-                is Screen.WantedList -> HomeScreen(Modifier.padding(innerPadding)) { navigateTo(it) }
-                is Screen.Home -> HomeScreen(Modifier.padding(innerPadding)) { navigateTo(it) }
+                is Screen.WantedList -> HomeScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    onNavigate = { navigateTo(it) }
+                )
+                is Screen.Home -> HomeScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    onNavigate = { navigateTo(it) }
+                )
                 is Screen.Parts -> PartScreen(
                     onCategoryClick = { navigateTo(Screen.PartsByCategory(it)) },
                     onBack = { popBackStack() }

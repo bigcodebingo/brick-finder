@@ -2,6 +2,10 @@ package com.bigbingo.brickfinder.data.db
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import androidx.core.database.getIntOrNull
+import androidx.core.database.getStringOrNull
+import com.bigbingo.brickfinder.data.ItemType
+import com.bigbingo.brickfinder.data.SearchItem
 import com.bigbingo.brickfinder.data.PartColorCount
 import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.data.Part
@@ -17,6 +21,7 @@ object DatabaseHelper {
     private const val DEFAULT_IMG_URL =
         "https://cdn.rebrickable.com/media/thumbs/nil.png/85x85p.png?1662040927.7130826"
 
+
     fun getDatabase(context: Context, dbName: String = "brickfinder.db"): SQLiteDatabase {
         val dbFile = context.getDatabasePath(dbName)
         if (!dbFile.exists()) {
@@ -28,6 +33,63 @@ object DatabaseHelper {
             }
         }
         return SQLiteDatabase.openDatabase(dbFile.path, null, SQLiteDatabase.OPEN_READWRITE)
+    }
+
+
+
+    fun searchLegoItems(context: Context, query: String): List<SearchItem> {
+        val db = getDatabase(context)
+        val results = mutableListOf<SearchItem>()
+        val likeQuery = "%${query.trim()}%"
+
+        val setCursor = db.rawQuery(
+            """
+        SELECT set_num, name, year, num_parts, set_img_url 
+        FROM sets 
+        WHERE (set_num LIKE ? OR name LIKE ?) AND num_parts > 0
+        LIMIT 5
+        """.trimIndent(),
+            arrayOf(likeQuery, likeQuery)
+        )
+
+        while (setCursor.moveToNext()) {
+            results.add(
+                SearchItem(
+                    itemNum = setCursor.getString(0),
+                    name = setCursor.getStringOrNull(1),
+                    type = ItemType.SET,
+                    year = setCursor.getIntOrNull(2),
+                    numParts = setCursor.getIntOrNull(3),
+                    imageUrl = setCursor.getStringOrNull(4)
+                )
+            )
+        }
+        setCursor.close()
+
+        val partCursor = db.rawQuery(
+            """
+        SELECT part_num, name, part_img_url 
+        FROM parts 
+        WHERE part_num LIKE ? OR name LIKE ?
+        LIMIT 10
+        """.trimIndent(),
+            arrayOf(likeQuery, likeQuery)
+        )
+
+        while (partCursor.moveToNext()) {
+            results.add(
+                SearchItem(
+                    itemNum = partCursor.getString(0),
+                    name = partCursor.getStringOrNull(1),
+                    type = ItemType.PART,
+                    imageUrl = partCursor.getStringOrNull(2)
+                )
+            )
+        }
+        partCursor.close()
+
+        db.close()
+        return results
     }
 
     fun getPartCategories(context: Context): List<PartCategory> {
