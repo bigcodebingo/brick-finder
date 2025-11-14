@@ -31,7 +31,7 @@ fun SearchHistoryChip(
             .height(155.dp)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = colors.surface),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(0.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Column(

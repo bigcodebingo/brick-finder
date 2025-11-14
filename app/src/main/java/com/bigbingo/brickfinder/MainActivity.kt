@@ -4,12 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import com.bigbingo.brickfinder.ui.Slider
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,16 +21,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Scaffold
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bigbingo.brickfinder.ui.SlideAnimation
 import com.bigbingo.brickfinder.ui.screens.Screen
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.PartsByCategoryScreen
 import com.bigbingo.brickfinder.ui.screens.home.HomeScreen
 import com.bigbingo.brickfinder.ui.screens.inventoryscreen.InventoryScreen
-import com.bigbingo.brickfinder.ui.screens.myaccount.AccountScreen
+import com.bigbingo.brickfinder.ui.screens.settings.SettingsScreen
+import com.bigbingo.brickfinder.ui.screens.wantedlist.WantedListScreen
 import com.bigbingo.brickfinder.ui.screens.partinfo.PartInfoScreen
 import com.bigbingo.brickfinder.ui.screens.partscatalog.PartScreen
 import com.bigbingo.brickfinder.ui.screens.setinfo.SetInfoScreen
@@ -89,8 +90,8 @@ fun BottomNavigationBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
                 )
             )
             NavigationBarItem(
-                icon = { Icon(Icons.Default.Person, contentDescription = "Account") },
-                label = { Text("Account") },
+                icon = { Icon(Icons.Default.Settings, contentDescription = "Account") },
+                label = { Text("Settings") },
                 selected = selectedIndex == 2,
                 onClick = { onItemSelected(2) },
                 colors = NavigationBarItemDefaults.colors(
@@ -105,12 +106,15 @@ fun BottomNavigationBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MainContent(
     isDarkTheme: Boolean,
     onToggleTheme: () -> Unit,
 ) {
     val navStack = remember { mutableStateListOf<Screen>(Screen.Home) }
+    var isSettingsVisible by remember { mutableStateOf(false) }
+    var isWantedListVisible by remember { mutableStateOf(false) }
 
     val partViewModel: PartsViewModel = viewModel()
     val setsViewModel: SetsViewModel = viewModel()
@@ -132,32 +136,35 @@ fun MainContent(
 
     val currentScreen = navStack.last()
     val showBottomBar = currentScreen is Screen.WantedList || currentScreen is Screen.Home
-            || currentScreen is Screen.Account
+            || isSettingsVisible || isWantedListVisible
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             if (showBottomBar) {
                 BottomNavigationBar(
-                    selectedIndex = when (currentScreen) {
-                        is Screen.WantedList -> 0
-                        is Screen.Home -> 1
-                        is Screen.Account -> 2
+                    selectedIndex = when {
+                        isSettingsVisible -> 2
+                        isWantedListVisible -> 0
+                        currentScreen is Screen.WantedList -> 0
+                        currentScreen is Screen.Home -> 1
                         else -> 1
                     }
                 ) { index ->
                     when (index) {
                         0 -> {
-                            navStack.clear()
-                            navStack.add(Screen.WantedList)
+                            isSettingsVisible = false
+                            isWantedListVisible = true
                         }
                         1 -> {
+                            isSettingsVisible = false
+                            isWantedListVisible = false
                             navStack.clear()
                             navStack.add(Screen.Home)
                         }
                         2 -> {
-                            navStack.clear()
-                            navStack.add(Screen.Account)
+                            isSettingsVisible = true
+                            isWantedListVisible = false
                         }
                     }
                 }
@@ -165,86 +172,107 @@ fun MainContent(
         }
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            when (val screen = currentScreen) {
-                is Screen.WantedList -> HomeScreen(
-                    modifier = Modifier.padding(innerPadding),
-                    onNavigate = { navigateTo(it) }
-                )
-                is Screen.Home -> HomeScreen(
-                    modifier = Modifier.padding(innerPadding),
-                    onNavigate = { navigateTo(it) }
-                )
-                is Screen.Parts -> PartScreen(
-                    onCategoryClick = { navigateTo(Screen.PartsByCategory(it)) },
-                    onBack = { popBackStack() }
-                )
-                is Screen.PartsByCategory -> PartsByCategoryScreen(
-                    categoryId = screen.categoryId,
-                    onBack = { popBackStack() },
-                    onPartClick = { partNum -> navigateTo(Screen.PartInfo(partNum)) }
-                )
-                is Screen.PartInfo -> PartInfoScreen(
-                    partNum = screen.partNum,
-                    onBack = { navStack.removeAt(navStack.lastIndex) },
-                    onCatalogClick = { navStack.clear(); navStack.add(Screen.Home) },
-                    onPartsClick = { navStack.add(Screen.Parts) },
-                    onCategoryClick = { categoryId ->
-                        navStack.add(Screen.PartsByCategory(categoryId))
-                    },
-                    onPartNumClick = {
-                        navStack.lastOrNull()?.let { lastScreen ->
-                            if (lastScreen is Screen.PartInfo) {
-                                navStack.add(Screen.PartInfo(lastScreen.partNum))
+            // Основной контент
+            AnimatedContent(
+                targetState = currentScreen,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(200)).togetherWith(fadeOut(animationSpec = tween(200)))
+                }
+            ) { screen ->
+                when (screen) {
+                    is Screen.WantedList -> {
+                        // WantedList теперь показывается через AnimatedVisibility
+                        // Оставляем пустой Box для совместимости
+                        Box(modifier = Modifier.fillMaxSize())
+                    }
+                    is Screen.Home -> HomeScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        onNavigate = { navigateTo(it) }
+                    )
+                    is Screen.Parts -> PartScreen(
+                        onCategoryClick = { navigateTo(Screen.PartsByCategory(it)) },
+                        onBack = { popBackStack() }
+                    )
+                    is Screen.PartsByCategory -> PartsByCategoryScreen(
+                        categoryId = screen.categoryId,
+                        onBack = { popBackStack() },
+                        onPartClick = { partNum -> navigateTo(Screen.PartInfo(partNum)) }
+                    )
+                    is Screen.PartInfo -> PartInfoScreen(
+                        partNum = screen.partNum,
+                        onBack = { navStack.removeAt(navStack.lastIndex) },
+                        onCatalogClick = { navStack.clear(); navStack.add(Screen.Home) },
+                        onPartsClick = { navStack.add(Screen.Parts) },
+                        onCategoryClick = { categoryId ->
+                            navStack.add(Screen.PartsByCategory(categoryId))
+                        },
+                        onPartNumClick = {
+                            navStack.lastOrNull()?.let { lastScreen ->
+                                if (lastScreen is Screen.PartInfo) {
+                                    navStack.add(Screen.PartInfo(lastScreen.partNum))
+                                }
                             }
+                        },
+                        onSetsClick = { part, sets ->
+                            navStack.add(Screen.Inventory(part, sets))
+                        },
+                        onColorClick = { part, sets, color ->
+                            navStack.add(Screen.Inventory(part, sets, color))
                         }
-                    },
-                    onSetsClick = { part, sets ->
-                        navStack.add(Screen.Inventory(part, sets))
-                    },
-                    onColorClick = { part, sets, color ->
-                        navStack.add(Screen.Inventory(part, sets, color))
-                    }
-                )
-                is Screen.Inventory -> InventoryScreen(
-                    part = screen.part,
-                    setNums = screen.setNums,
-                    selectedColor = screen.color,
-                    onBack = { navStack.removeAt(navStack.lastIndex) },
-                    onCatalogClick = {
-                        navStack.clear()
-                        navStack.add(Screen.Home)
-                    },
-                    onPartsClick = { navStack.add(Screen.Parts) },
-                    onCategoryClick = { categoryId ->
-                        navStack.add(Screen.PartsByCategory(categoryId))
-                    },
-                    onPartNumClick = {
-                        navStack.add(Screen.PartInfo(screen.part.part_num))
-                    },
-                    onSetNumClick = { setNum ->
-                        navStack.add(Screen.SetInfo(setNum))
-                    }
-                )
-                is Screen.SetsCatalog -> SetsCatalogScreen(
-                    onBack = { navStack.removeAt(navStack.lastIndex) },
-                    onParentClick = { parentId -> navStack.add(Screen.SetsTheme(parentId)) },
-                    onChildClick = { childId -> navStack.add(Screen.SetsTheme(childId)) },
-                    onSearchNavigate = { searchId -> navStack.add(Screen.SetsTheme(searchId)) }
-                )
-                is Screen.SetsTheme -> SetsThemeScreen(
-                    themeId = screen.themeId,
-                    onBack = { popBackStack() }
-                ) { setNum -> navigateTo(Screen.SetInfo(setNum, screen.themeId)) }
-                is Screen.SetInfo -> SetInfoScreen(
-                    setNum = screen.setNum,
-                    themeId = screen.themeId,
-                    onBack = { popBackStack() },
-                    onCatalogClick = { navStack.clear(); navStack.add(Screen.Home) },
-                    onSetsClick = { navigateTo(Screen.SetsCatalog) },
-                    onThemeClick = { themeId -> navStack.add(Screen.SetsTheme(themeId)) },
-                    onPartNumClick = { navigateTo(Screen.PartInfo(it)) }
-                )
-                is Screen.Account -> AccountScreen(innerPadding = innerPadding, onToggleTheme = onToggleTheme)
+                    )
+                    is Screen.Inventory -> InventoryScreen(
+                        part = screen.part,
+                        setNums = screen.setNums,
+                        selectedColor = screen.color,
+                        onBack = { navStack.removeAt(navStack.lastIndex) },
+                        onCatalogClick = {
+                            navStack.clear()
+                            navStack.add(Screen.Home)
+                        },
+                        onPartsClick = { navStack.add(Screen.Parts) },
+                        onCategoryClick = { categoryId ->
+                            navStack.add(Screen.PartsByCategory(categoryId))
+                        },
+                        onPartNumClick = {
+                            navStack.add(Screen.PartInfo(screen.part.part_num))
+                        },
+                        onSetNumClick = { setNum ->
+                            navStack.add(Screen.SetInfo(setNum))
+                        }
+                    )
+                    is Screen.SetsCatalog -> SetsCatalogScreen(
+                        onBack = { navStack.removeAt(navStack.lastIndex) },
+                        onParentClick = { parentId -> navStack.add(Screen.SetsTheme(parentId)) },
+                        onChildClick = { childId -> navStack.add(Screen.SetsTheme(childId)) },
+                        onSearchNavigate = { searchId -> navStack.add(Screen.SetsTheme(searchId)) }
+                    )
+                    is Screen.SetsTheme -> SetsThemeScreen(
+                        themeId = screen.themeId,
+                        onBack = { popBackStack() }
+                    ) { setNum -> navigateTo(Screen.SetInfo(setNum, screen.themeId)) }
+                    is Screen.SetInfo -> SetInfoScreen(
+                        setNum = screen.setNum,
+                        themeId = screen.themeId,
+                        onBack = { popBackStack() },
+                        onCatalogClick = { navStack.clear(); navStack.add(Screen.Home) },
+                        onSetsClick = { navigateTo(Screen.SetsCatalog) },
+                        onThemeClick = { themeId -> navStack.add(Screen.SetsTheme(themeId)) },
+                        onPartNumClick = { navigateTo(Screen.PartInfo(it)) }
+                    )
+                }
+            }
+
+            SlideAnimation(
+                visible = isWantedListVisible,
+                direction = Slider.LEFT
+            ) {
+                WantedListScreen(innerPadding = innerPadding)
+            }
+            SlideAnimation(
+                visible = isSettingsVisible,
+                direction = Slider.RIGHT
+            ) {
+                SettingsScreen(innerPadding = innerPadding, onToggleTheme = onToggleTheme)
             }
         }
     }

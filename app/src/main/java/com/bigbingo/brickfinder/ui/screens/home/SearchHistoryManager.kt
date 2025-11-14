@@ -27,7 +27,6 @@ object SearchHistoryManager {
 
         if (list.size > MAX_ITEMS) list.removeAt(list.size - 1)
 
-
         prefs.edit { putString(KEY, gson.toJson(list))}
     }
 

@@ -1,4 +1,4 @@
-package com.bigbingo.brickfinder.ui.screens.myaccount
+package com.bigbingo.brickfinder.ui.screens.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -12,11 +12,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun AccountScreen(
+fun SettingsScreen(
     innerPadding: PaddingValues = PaddingValues(0.dp),
     onToggleTheme: () -> Unit
 ) {
@@ -27,7 +26,7 @@ fun AccountScreen(
             .padding(innerPadding)
     ) {
         Text(
-            text = "Account Info",
+            text = "Settings Info",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.align(Alignment.TopStart)

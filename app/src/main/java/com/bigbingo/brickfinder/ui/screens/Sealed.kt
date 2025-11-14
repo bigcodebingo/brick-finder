@@ -6,7 +6,6 @@ import com.bigbingo.brickfinder.data.PartColor
 sealed class Screen {
     object WantedList : Screen()
     object Home : Screen()
-    object Account : Screen()
     object Parts : Screen()
     data class PartsByCategory(val categoryId: Int) : Screen()
     data class PartInfo(val partNum: String) : Screen()
