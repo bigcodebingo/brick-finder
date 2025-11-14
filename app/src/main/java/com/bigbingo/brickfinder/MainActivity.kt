@@ -58,13 +58,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun BottomNavigationBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(width = 1.dp, color = MaterialTheme.colorScheme.outline)
-    ) {
+    Box(modifier = Modifier.fillMaxWidth())
+    {
         NavigationBar(containerColor = MaterialTheme.colorScheme.surface)
-
         {
             NavigationBarItem(
                 icon = { Icon(Icons.Default.Favorite, contentDescription = "Wanted List") },
@@ -81,7 +77,7 @@ fun BottomNavigationBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
             )
             NavigationBarItem(
                 icon = { Icon(Icons.Default.Home, contentDescription = "Catalog") },
-                label = { Text("Catalog") },
+                label = { Text("Home") },
                 selected = selectedIndex == 1,
                 onClick = { onItemSelected(1) },
                 colors = NavigationBarItemDefaults.colors(

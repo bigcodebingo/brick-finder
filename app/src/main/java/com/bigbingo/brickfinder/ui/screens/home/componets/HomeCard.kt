@@ -26,13 +26,12 @@ fun HomeCard(
     imageRes: Int,
     backgroundColor: Color,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    imageHeight: Dp = 100.dp,
 ) {
     val colors = MaterialTheme.colorScheme
 
     Card(
-        modifier = modifier
+        modifier = Modifier
+            .width(155.dp)
             .height(185.dp)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = colors.surface),
@@ -48,7 +47,7 @@ fun HomeCard(
                 painter = painterResource(imageRes),
                 contentDescription = null,
                 modifier = Modifier
-                    .height(imageHeight)
+                    .height(100.dp)
                     .fillMaxWidth()
             )
 

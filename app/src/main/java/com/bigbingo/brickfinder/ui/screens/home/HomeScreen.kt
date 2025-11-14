@@ -2,6 +2,8 @@ package com.bigbingo.brickfinder.ui.screens.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -12,9 +14,11 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.R
 import com.bigbingo.brickfinder.data.ItemType
+import com.bigbingo.brickfinder.data.SearchItem
 import com.bigbingo.brickfinder.ui.screens.Screen
 import com.bigbingo.brickfinder.ui.screens.home.componets.HomeCard
 import com.bigbingo.brickfinder.ui.screens.home.componets.HomeSearchResult
+import com.bigbingo.brickfinder.ui.screens.home.componets.SearchHistoryChip
 import com.bigbingo.brickfinder.ui.screens.homepage.componets.HomeSearchBar
 import com.bigbingo.brickfinder.viewmodel.HomeViewModel
 
@@ -27,6 +31,23 @@ fun HomeScreen(
     val context = LocalContext.current
     var searchQuery by remember { mutableStateOf(viewModel.searchQuery) }
     var isDropdownVisible by remember { mutableStateOf(false) }
+
+    var searchHistory by remember { mutableStateOf(SearchHistoryManager.get(context)) }
+
+    fun handleItemClick(item: SearchItem) {
+        SearchHistoryManager.add(context, item)
+        searchHistory = SearchHistoryManager.get(context)
+
+        searchQuery = ""
+        viewModel.searchQuery = ""
+        viewModel.searchResults.clear()
+        isDropdownVisible = false
+
+        when(item.type) {
+            ItemType.SET -> onNavigate(Screen.SetInfo(item.itemNum))
+            ItemType.PART -> onNavigate(Screen.PartInfo(item.itemNum))
+        }
+    }
 
     Box(
         modifier = modifier
@@ -54,8 +75,6 @@ fun HomeScreen(
                     imageRes = R.drawable.catalog_parts,
                     backgroundColor = Color(0x80daeef6),
                     onClick = { onNavigate(Screen.Parts) },
-                    modifier = Modifier.weight(1f),
-                    imageHeight = 100.dp
                 )
 
                 HomeCard(
@@ -64,14 +83,29 @@ fun HomeScreen(
                     imageRes = R.drawable.catalog_sets,
                     backgroundColor = Color(0x80f5efd6),
                     onClick = { onNavigate(Screen.SetsCatalog) },
-                    modifier = Modifier.weight(1f)
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(25.dp))
 
             Text("Search history", style = MaterialTheme.typography.bodyLarge)
-        }
+            Spacer(modifier = Modifier.height(8.dp))
 
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ){
+                items(searchHistory) { item ->
+                    SearchHistoryChip(item) {
+                        SearchHistoryManager.add(context, item)
+                        searchHistory = SearchHistoryManager.get(context)
+                        when (item.type) {
+                            ItemType.SET -> onNavigate(Screen.SetInfo(item.itemNum))
+                            ItemType.PART -> onNavigate(Screen.PartInfo(item.itemNum))
+                        }
+                    }
+                }
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -86,15 +120,8 @@ fun HomeScreen(
                 },
                 onSearch = {
                     viewModel.searchResults.firstOrNull()?.let { item ->
-                        when(item.type) {
-                            ItemType.SET -> onNavigate(Screen.SetInfo(item.itemNum))
-                            ItemType.PART -> onNavigate(Screen.PartInfo(item.itemNum))
-                        }
+                        handleItemClick(item)
                     }
-                    searchQuery = ""
-                    viewModel.searchQuery = ""
-                    viewModel.searchResults.clear()
-                    isDropdownVisible = false
                 }
             )
 
@@ -102,16 +129,8 @@ fun HomeScreen(
                 HomeSearchResult(
                     searchResults = viewModel.searchResults,
                     onResultSelected = { selectedItemNum ->
-                        val item = viewModel.searchResults.find { it.itemNum == selectedItemNum }
-                        item?.let {
-                            searchQuery = ""
-                            viewModel.searchQuery = ""
-                            viewModel.searchResults.clear()
-                            isDropdownVisible = false
-                            when(it.type) {
-                                ItemType.SET -> onNavigate(Screen.SetInfo(it.itemNum))
-                                ItemType.PART -> onNavigate(Screen.PartInfo(it.itemNum))
-                            }
+                        viewModel.searchResults.find { it.itemNum == selectedItemNum }?.let { item ->
+                            handleItemClick(item)
                         }
                     },
                     modifier = Modifier.zIndex(2f).padding(top = 4.dp)

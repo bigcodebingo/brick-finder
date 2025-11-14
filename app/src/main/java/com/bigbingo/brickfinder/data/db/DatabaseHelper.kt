@@ -17,10 +17,8 @@ import com.bigbingo.brickfinder.data.SetInfo
 import com.bigbingo.brickfinder.data.SetInventory
 
 object DatabaseHelper {
-
     private const val DEFAULT_IMG_URL =
         "https://cdn.rebrickable.com/media/thumbs/nil.png/85x85p.png?1662040927.7130826"
-
 
     fun getDatabase(context: Context, dbName: String = "brickfinder.db"): SQLiteDatabase {
         val dbFile = context.getDatabasePath(dbName)
@@ -34,8 +32,6 @@ object DatabaseHelper {
         }
         return SQLiteDatabase.openDatabase(dbFile.path, null, SQLiteDatabase.OPEN_READWRITE)
     }
-
-
 
     fun searchLegoItems(context: Context, query: String): List<SearchItem> {
         val db = getDatabase(context)
