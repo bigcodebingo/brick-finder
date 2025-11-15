@@ -10,7 +10,7 @@ import com.bigbingo.brickfinder.data.PartCategory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import com.bigbingo.brickfinder.data.db.DatabaseHelper
+import com.bigbingo.brickfinder.helpers.DatabaseHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

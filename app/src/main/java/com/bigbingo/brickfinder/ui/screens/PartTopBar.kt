@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 import com.bigbingo.brickfinder.viewmodel.SetsViewModel
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,12 +33,14 @@ fun PartTopBar(
     onPartNumClick: () -> Unit,
     showInSets: Boolean = true,
     viewModel: PartsViewModel? = null,
-    setsViewModel: SetsViewModel = viewModel()
+    setsViewModel: SetsViewModel = viewModel(),
+    isInWantedList: Boolean = false,
+    onWantedListToggle: () -> Unit = {}
 ) {
     TopAppBar(
         title = {
             FlowRow(
-                maxLines = 2,
+                maxLines = 3,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
@@ -104,7 +107,7 @@ fun PartTopBar(
                 }
             }
         },
-        expandedHeight = 50.dp,
+        expandedHeight = 65.dp,
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(
@@ -112,6 +115,17 @@ fun PartTopBar(
                     contentDescription = "Back",
                     tint = Color.White
                 )
+            }
+        },
+        actions = {
+            if (partNum != null) {
+                IconButton(onClick = onWantedListToggle) {
+                    Icon(
+                        imageVector = if (isInWantedList) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = if (isInWantedList) "Remove from wanted list" else "Add to wanted list",
+                        tint = if (isInWantedList) Color(0xFFFF5050) else Color.White
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(

@@ -13,20 +13,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.bigbingo.brickfinder.data.ItemType
+import com.bigbingo.brickfinder.data.Item
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.bigbingo.brickfinder.data.db.DatabaseHelper
-import com.bigbingo.brickfinder.data.db.DatabaseHelper.getThemeIdBySetNum
+import com.bigbingo.brickfinder.helpers.DatabaseHelper
+import com.bigbingo.brickfinder.helpers.DatabaseHelper.getThemeIdBySetNum
 import com.bigbingo.brickfinder.ui.screens.LoadingScreen
 import com.bigbingo.brickfinder.ui.screens.setinfo.components.SetTopBar
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 import com.bigbingo.brickfinder.viewmodel.SetsViewModel
 import com.bigbingo.brickfinder.ui.screens.setinfo.components.SetPartsList
+import com.bigbingo.brickfinder.viewmodel.WantedListViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,8 +46,10 @@ fun SetInfoScreen(
     onPartNumClick: (String) -> Unit,
     viewModel: SetsViewModel = viewModel(),
     partViewModel: PartsViewModel = viewModel(),
+    wantedListViewModel: WantedListViewModel = viewModel(),
     context: Context = LocalContext.current
 ) {
+    val name by viewModel.setName.collectAsState()
     val year by viewModel.setYear.collectAsState()
     val numParts by viewModel.setNumParts.collectAsState()
     val selectedInventory by viewModel.selectedInventory.collectAsState()
@@ -60,8 +67,11 @@ fun SetInfoScreen(
         }
     }
 
+    var isInWantedList by remember { mutableStateOf(false) }
+
     LaunchedEffect(setNum) {
         viewModel.loadSetInfo(context, setNum)
+        isInWantedList = wantedListViewModel.isInWantedList(context, setNum, ItemType.SET)
     }
 
     val currentInventory = selectedInventory
@@ -85,7 +95,25 @@ fun SetInfoScreen(
                             onThemeClick(id)
                         }
                     },
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    isInWantedList = isInWantedList,
+                    onWantedListToggle = {
+                        if (isInWantedList) {
+                            wantedListViewModel.removeFromWantedList(context, setNum, ItemType.SET)
+                            isInWantedList = false
+                        } else {
+                            val wantedItem = Item(
+                                itemNum = setNum,
+                                name = name,
+                                type = ItemType.SET,
+                                imageUrl = setImageUrl,
+                                year = year,
+                                numParts = numParts
+                            )
+                            wantedListViewModel.addToWantedList(context, wantedItem)
+                            isInWantedList = true
+                        }
+                    }
                 )
             },
             containerColor = Color(0xffeeeeee)

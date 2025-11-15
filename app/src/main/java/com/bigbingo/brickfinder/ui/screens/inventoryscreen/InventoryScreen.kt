@@ -17,7 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.data.PartColor
-import com.bigbingo.brickfinder.data.db.DatabaseHelper
+import com.bigbingo.brickfinder.helpers.DatabaseHelper
 import com.bigbingo.brickfinder.ui.screens.LoadingScreen
 import com.bigbingo.brickfinder.ui.screens.PartTopBar
 import com.bigbingo.brickfinder.ui.screens.inventoryscreen.components.InventoryList

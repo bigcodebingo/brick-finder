@@ -1,4 +1,4 @@
-package com.bigbingo.brickfinder.ui
+package com.bigbingo.brickfinder.data
 
 enum class Slider {
     LEFT, RIGHT

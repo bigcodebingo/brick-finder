@@ -23,13 +23,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.bigbingo.brickfinder.data.Item
 import com.bigbingo.brickfinder.data.Part
+import com.bigbingo.brickfinder.data.ItemType
 import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.ui.screens.LoadingScreen
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
-import com.bigbingo.brickfinder.data.db.DatabaseHelper
+import com.bigbingo.brickfinder.helpers.DatabaseHelper
 import com.bigbingo.brickfinder.ui.screens.partinfo.components.ColorList
 import com.bigbingo.brickfinder.ui.screens.PartTopBar
+import com.bigbingo.brickfinder.viewmodel.WantedListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,8 +45,11 @@ fun PartInfoScreen(
     onPartNumClick: () -> Unit,
     onSetsClick: (Part, List<String>) -> Unit,
     onColorClick: (Part, List<String>, PartColor) -> Unit,
+
     viewModel: PartsViewModel = viewModel(),
-) {
+    wantedListViewModel: WantedListViewModel = viewModel(),
+
+    ) {
     val context = LocalContext.current
     val part by viewModel.part.collectAsState()
     val setNums  by viewModel.setNums.collectAsState()
@@ -56,6 +62,13 @@ fun PartInfoScreen(
         }
     }
 
+    var isInWantedList by remember { mutableStateOf(false) }
+
+    LaunchedEffect(part?.part_num) {
+        part?.part_num?.let { partNum ->
+            isInWantedList = wantedListViewModel.isInWantedList(context, partNum, ItemType.PART)
+        } ?: run { isInWantedList = false }
+    }
 
     val isFirstLoad = remember { mutableStateOf(true) }
 
@@ -97,7 +110,25 @@ fun PartInfoScreen(
                     },
                     onPartNumClick = onPartNumClick,
                     viewModel = viewModel,
-                    showInSets = false
+                    showInSets = false,
+                    isInWantedList = isInWantedList,
+                    onWantedListToggle = {
+                        part?.let { p ->
+                            if (isInWantedList) {
+                                wantedListViewModel.removeFromWantedList(context, p.part_num, ItemType.PART)
+                                isInWantedList = false
+                            } else {
+                                val wantedItem = Item(
+                                    itemNum = p.part_num,
+                                    name = p.name,
+                                    type = ItemType.PART,
+                                    imageUrl = p.part_img_url
+                                )
+                                wantedListViewModel.addToWantedList(context, wantedItem)
+                                isInWantedList = true
+                            }
+                        }
+                    }
                 )
             },
             containerColor = Color.White

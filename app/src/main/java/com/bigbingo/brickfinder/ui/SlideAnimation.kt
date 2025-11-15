@@ -7,6 +7,8 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.zIndex
+import com.bigbingo.brickfinder.data.Slider
+
 
 @Composable
 fun SlideAnimation(

@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.data.SetTheme
-import com.bigbingo.brickfinder.data.db.DatabaseHelper
+import com.bigbingo.brickfinder.helpers.DatabaseHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import com.bigbingo.brickfinder.data.Set
@@ -28,6 +28,8 @@ class SetsViewModel : ViewModel() {
     val totalSets: StateFlow<Int> = _totalSets
     private val _currentPage = MutableStateFlow(1)
     val currentPage: StateFlow<Int> = _currentPage
+    private val _setName = MutableStateFlow<String?>(null)
+    val setName: StateFlow<String?> = _setName
     private val _setYear = MutableStateFlow<Int?>(null)
     val setYear: StateFlow<Int?> = _setYear
     private val _setNumParts = MutableStateFlow<Int?>(null)
@@ -108,6 +110,7 @@ class SetsViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val info = DatabaseHelper.getSetInfo(context, setNum)
             withContext(Dispatchers.Main) {
+                _setName.value = info.name
                 _setYear.value = info.year
                 _setNumParts.value = info.totalParts
                 _setInventories.value = info.inventories

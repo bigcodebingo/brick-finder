@@ -14,7 +14,7 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.R
 import com.bigbingo.brickfinder.data.ItemType
-import com.bigbingo.brickfinder.data.SearchItem
+import com.bigbingo.brickfinder.data.Item
 import com.bigbingo.brickfinder.ui.screens.Screen
 import com.bigbingo.brickfinder.ui.screens.home.componets.HomeCard
 import com.bigbingo.brickfinder.ui.screens.home.componets.HomeSearchResult
@@ -34,7 +34,7 @@ fun HomeScreen(
 
     var searchHistory by remember { mutableStateOf(SearchHistoryManager.get(context)) }
 
-    fun handleItemClick(item: SearchItem) {
+    fun handleItemClick(item: Item) {
         SearchHistoryManager.add(context, item)
         searchHistory = SearchHistoryManager.get(context)
 

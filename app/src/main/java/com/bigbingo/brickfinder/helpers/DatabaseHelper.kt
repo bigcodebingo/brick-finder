@@ -1,20 +1,20 @@
-package com.bigbingo.brickfinder.data.db
+package com.bigbingo.brickfinder.helpers
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getStringOrNull
 import com.bigbingo.brickfinder.data.ItemType
-import com.bigbingo.brickfinder.data.SearchItem
-import com.bigbingo.brickfinder.data.PartColorCount
-import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.data.PartAppearance
 import com.bigbingo.brickfinder.data.PartCategory
-import com.bigbingo.brickfinder.data.SetTheme
+import com.bigbingo.brickfinder.data.PartColor
+import com.bigbingo.brickfinder.data.PartColorCount
+import com.bigbingo.brickfinder.data.Item
 import com.bigbingo.brickfinder.data.Set
 import com.bigbingo.brickfinder.data.SetInfo
 import com.bigbingo.brickfinder.data.SetInventory
+import com.bigbingo.brickfinder.data.SetTheme
 
 object DatabaseHelper {
     private const val DEFAULT_IMG_URL =
@@ -33,9 +33,9 @@ object DatabaseHelper {
         return SQLiteDatabase.openDatabase(dbFile.path, null, SQLiteDatabase.OPEN_READWRITE)
     }
 
-    fun searchLegoItems(context: Context, query: String): List<SearchItem> {
+    fun searchLegoItems(context: Context, query: String): List<Item> {
         val db = getDatabase(context)
-        val results = mutableListOf<SearchItem>()
+        val results = mutableListOf<Item>()
         val likeQuery = "%${query.trim()}%"
 
         val setCursor = db.rawQuery(
@@ -50,7 +50,7 @@ object DatabaseHelper {
 
         while (setCursor.moveToNext()) {
             results.add(
-                SearchItem(
+                Item(
                     itemNum = setCursor.getString(0),
                     name = setCursor.getStringOrNull(1),
                     type = ItemType.SET,
@@ -74,7 +74,7 @@ object DatabaseHelper {
 
         while (partCursor.moveToNext()) {
             results.add(
-                SearchItem(
+                Item(
                     itemNum = partCursor.getString(0),
                     name = partCursor.getStringOrNull(1),
                     type = ItemType.PART,
@@ -487,13 +487,14 @@ object DatabaseHelper {
         val db = getDatabase(context)
 
         val setCursor = db.rawQuery(
-            "SELECT year, num_parts, set_img_url FROM sets WHERE set_num = ?",
+            "SELECT name, year, num_parts, set_img_url FROM sets WHERE set_num = ?",
             arrayOf(setNum)
         )
         if (!setCursor.moveToFirst()) throw Exception("Set not found: $setNum")
-        val year = setCursor.getInt(0)
-        val numParts = setCursor.getInt(1)
-        val rawImg = setCursor.getString(2)
+        val name = setCursor.getString(0)
+        val year = setCursor.getInt(1)
+        val numParts = setCursor.getInt(2)
+        val rawImg = setCursor.getString(3)
         val imgUrl = if (rawImg.isNullOrBlank()) DEFAULT_IMG_URL else rawImg
         setCursor.close()
 
@@ -585,6 +586,6 @@ object DatabaseHelper {
         invCursor.close()
         db.close()
 
-        return SetInfo(setNum, year, numParts, inventories, imgUrl)
+        return SetInfo(setNum, name, year, numParts, inventories, imgUrl)
     }
 }

@@ -16,11 +16,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.text.style.TextOverflow
 import coil.compose.AsyncImage
-import com.bigbingo.brickfinder.data.SearchItem
+import com.bigbingo.brickfinder.data.Item
 
 @Composable
 fun SearchHistoryChip(
-    item: SearchItem,
+    item: Item,
     onClick: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme

@@ -10,6 +10,7 @@ data class SetInventory(
 )
 data class SetInfo(
     val setNum: String,
+    val name: String,
     val year: Int,
     val totalParts: Int,
     val inventories: List<SetInventory>,

@@ -10,16 +10,15 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.bigbingo.brickfinder.data.SearchItem
-import com.bigbingo.brickfinder.data.db.DatabaseHelper
+import com.bigbingo.brickfinder.data.Item
+import com.bigbingo.brickfinder.helpers.DatabaseHelper
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 
 class HomeViewModel : ViewModel() {
     var searchQuery by mutableStateOf("")
 
-
-    var searchResults = mutableStateListOf< SearchItem>()
+    var searchResults = mutableStateListOf< Item>()
         private set
 
     fun onSearchQueryChange(query: String, context: Context) {

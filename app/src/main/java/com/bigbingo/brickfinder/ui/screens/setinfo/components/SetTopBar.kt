@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,7 +38,9 @@ fun SetTopBar(
     onSetsClick: () -> Unit,
     onThemeClick: () -> Unit,
     viewModel: SetsViewModel? = null,
-    partsViewModel: PartsViewModel = viewModel()
+    partsViewModel: PartsViewModel = viewModel(),
+    isInWantedList: Boolean = false,
+    onWantedListToggle: () -> Unit = {}
 ) {
     TopAppBar(
         title = {
@@ -105,6 +109,17 @@ fun SetTopBar(
                     contentDescription = "Back",
                     tint = Color.White
                 )
+            }
+        },
+        actions = {
+            if (setNum != null) {
+                IconButton(onClick = onWantedListToggle) {
+                    Icon(
+                        imageVector = if (isInWantedList) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = if (isInWantedList) "Remove from wanted list" else "Add to wanted list",
+                        tint = if (isInWantedList) Color(0xFFFF5050) else Color.White
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
