@@ -16,7 +16,7 @@ import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun PartScreen(
+fun PartCatalogScreen(
     onBack: () -> Unit,
     viewModel: PartsViewModel = viewModel(),
     onCategoryClick: (Int) -> Unit

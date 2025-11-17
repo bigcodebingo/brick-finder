@@ -7,12 +7,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.ui.screens.setscatalog.components.SetsTopBar
 import com.bigbingo.brickfinder.ui.screens.setscatalog.components.ThemeList
 import com.bigbingo.brickfinder.viewmodel.SetsViewModel
-import com.bigbingo.brickfinder.ui.screens.setscatalog.components.SearchResult
+import com.bigbingo.brickfinder.ui.screens.setscatalog.components.ThemeSearchResult
 import com.bigbingo.brickfinder.ui.screens.setscatalog.components.SetSearchBar
 import kotlinx.coroutines.delay
 
@@ -97,7 +96,7 @@ fun SetsCatalogScreen(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 if (isDropdownVisible) {
-                    SearchResult(
+                    ThemeSearchResult(
                         searchResults = searchResults,
                         onResultSelected = { themeId ->
                             val resultPair = searchResults.find { (theme, _) -> theme.id == themeId }

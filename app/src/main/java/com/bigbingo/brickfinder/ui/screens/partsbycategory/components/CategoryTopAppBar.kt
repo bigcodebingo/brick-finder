@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PartsTopAppBar(
+fun CategoryTopAppBar(
     totalItems: Int,
     currentPage: Int,
     totalPages: Int,

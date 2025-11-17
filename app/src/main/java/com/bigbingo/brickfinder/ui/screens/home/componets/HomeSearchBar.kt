@@ -129,7 +129,7 @@ fun HomeSearchBar(
                 isFocused -> {
                     Text(
                         text = "Cancel",
-                        color = MaterialTheme.colorScheme.primary,
+                        color = Color.Gray,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier

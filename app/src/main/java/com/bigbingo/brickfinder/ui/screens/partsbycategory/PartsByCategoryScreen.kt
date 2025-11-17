@@ -12,7 +12,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 import com.bigbingo.brickfinder.ui.screens.PaginationBar
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.components.PartsGrid
-import com.bigbingo.brickfinder.ui.screens.partsbycategory.components.PartsTopAppBar
+import com.bigbingo.brickfinder.ui.screens.partsbycategory.components.CategoryTopAppBar
 import com.bigbingo.brickfinder.ui.screens.LoadingScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,7 +49,7 @@ fun PartsByCategoryScreen(
     } else {
         Scaffold(
             topBar = {
-                PartsTopAppBar(
+                CategoryTopAppBar(
                     totalItems = totalItems,
                     currentPage = currentPage,
                     totalPages = totalPages,

@@ -8,26 +8,21 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import com.bigbingo.brickfinder.data.Slider
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Scaffold
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bigbingo.brickfinder.ui.SlideAnimation
+import com.bigbingo.brickfinder.ui.screens.BottomNavigationBar
 import com.bigbingo.brickfinder.ui.screens.Screen
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.PartsByCategoryScreen
 import com.bigbingo.brickfinder.ui.screens.home.HomeScreen
-import com.bigbingo.brickfinder.ui.screens.inventoryscreen.InventoryScreen
-import com.bigbingo.brickfinder.ui.screens.settings.SettingsScreen
+import com.bigbingo.brickfinder.ui.screens.inventory.InventoryScreen
 import com.bigbingo.brickfinder.ui.screens.wantedlist.WantedListScreen
 import com.bigbingo.brickfinder.ui.screens.partinfo.PartInfoScreen
-import com.bigbingo.brickfinder.ui.screens.partscatalog.PartScreen
+import com.bigbingo.brickfinder.ui.screens.partscatalog.PartCatalogScreen
 import com.bigbingo.brickfinder.ui.screens.setinfo.SetInfoScreen
 import com.bigbingo.brickfinder.ui.screens.setsbytheme.SetsThemeScreen
 import com.bigbingo.brickfinder.ui.screens.setscatalog.SetsCatalogScreen
@@ -52,55 +47,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun BottomNavigationBar(selectedIndex: Int, onItemSelected: (Int) -> Unit) {
-    Box(modifier = Modifier.fillMaxWidth())
-    {
-        NavigationBar(containerColor = MaterialTheme.colorScheme.surface)
-        {
-            NavigationBarItem(
-                icon = { Icon(Icons.Default.Favorite, contentDescription = "Wanted List") },
-                label = { Text("Wanted List") },
-                selected = selectedIndex == 0,
-                onClick = { onItemSelected(0) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSurface,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSecondary,
-                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSecondary,
-                    indicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                )
-            )
-            NavigationBarItem(
-                icon = { Icon(Icons.Default.Home, contentDescription = "Catalog") },
-                label = { Text("Home") },
-                selected = selectedIndex == 1,
-                onClick = { onItemSelected(1) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSurface,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSecondary,
-                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSecondary,
-                    indicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                )
-            )
-            NavigationBarItem(
-                icon = { Icon(Icons.Default.Settings, contentDescription = "Account") },
-                label = { Text("Settings") },
-                selected = selectedIndex == 2,
-                onClick = { onItemSelected(2) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSurface,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSecondary,
-                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSecondary,
-                    indicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                )
-            )
-        }
-    }
-}
-
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MainContent(
@@ -108,7 +54,6 @@ fun MainContent(
     onToggleTheme: () -> Unit,
 ) {
     val navStack = remember { mutableStateListOf<Screen>(Screen.Home) }
-    var isSettingsVisible by remember { mutableStateOf(false) }
     var isWantedListVisible by remember { mutableStateOf(false) }
 
     val partViewModel: PartsViewModel = viewModel()
@@ -130,7 +75,7 @@ fun MainContent(
     }
 
     val currentScreen = navStack.last()
-    val showBottomBar =  currentScreen is Screen.Home || isSettingsVisible || isWantedListVisible
+    val showBottomBar =  currentScreen is Screen.Home  || isWantedListVisible
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -138,7 +83,6 @@ fun MainContent(
             if (showBottomBar) {
                 BottomNavigationBar(
                     selectedIndex = when {
-                        isSettingsVisible -> 2
                         isWantedListVisible -> 0
                         currentScreen is Screen.Home -> 1
                         else -> 1
@@ -146,18 +90,12 @@ fun MainContent(
                 ) { index ->
                     when (index) {
                         0 -> {
-                            isSettingsVisible = false
                             isWantedListVisible = true
                         }
                         1 -> {
-                            isSettingsVisible = false
                             isWantedListVisible = false
                             navStack.clear()
                             navStack.add(Screen.Home)
-                        }
-                        2 -> {
-                            isSettingsVisible = true
-                            isWantedListVisible = false
                         }
                     }
                 }
@@ -170,7 +108,7 @@ fun MainContent(
                     modifier = Modifier.padding(innerPadding),
                     onNavigate = { navigateTo(it) }
                 )
-                is Screen.Parts -> PartScreen(
+                is Screen.Parts -> PartCatalogScreen(
                     onCategoryClick = { navigateTo(Screen.PartsByCategory(it)) },
                     onBack = { popBackStack() }
                 )
@@ -241,7 +179,6 @@ fun MainContent(
                     onPartNumClick = { navigateTo(Screen.PartInfo(it)) }
                 )
             }
-
             SlideAnimation(
                 visible = isWantedListVisible,
                 direction = Slider.LEFT
@@ -251,12 +188,6 @@ fun MainContent(
                     onPartClick = { partNum -> navigateTo(Screen.PartInfo(partNum)) },
                     onSetClick = { setNum -> navigateTo(Screen.SetInfo(setNum)) }
                 )
-            }
-            SlideAnimation(
-                visible = isSettingsVisible,
-                direction = Slider.RIGHT
-            ) {
-                SettingsScreen(innerPadding = innerPadding, onToggleTheme = onToggleTheme)
             }
         }
     }

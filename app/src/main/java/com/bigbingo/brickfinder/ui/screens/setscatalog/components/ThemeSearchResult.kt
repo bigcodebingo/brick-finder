@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.bigbingo.brickfinder.data.SetTheme
 
 @Composable
-fun SearchResult(
+fun ThemeSearchResult(
     searchResults: List<Pair<SetTheme, String?>>,
     onResultSelected: (Int) -> Unit,
     modifier: Modifier = Modifier

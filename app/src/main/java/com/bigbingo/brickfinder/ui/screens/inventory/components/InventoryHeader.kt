@@ -1,4 +1,4 @@
-package com.bigbingo.brickfinder.ui.screens.inventoryscreen.components
+package com.bigbingo.brickfinder.ui.screens.inventory.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,12 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.toColorInt
-import com.bigbingo.brickfinder.data.PartColor
 
 @Composable
 fun InventoryHeader() {

@@ -1,6 +1,5 @@
-package com.bigbingo.brickfinder.ui.screens.inventoryscreen
+package com.bigbingo.brickfinder.ui.screens.inventory
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,7 +19,7 @@ import com.bigbingo.brickfinder.data.PartColor
 import com.bigbingo.brickfinder.helpers.DatabaseHelper
 import com.bigbingo.brickfinder.ui.screens.LoadingScreen
 import com.bigbingo.brickfinder.ui.screens.PartTopBar
-import com.bigbingo.brickfinder.ui.screens.inventoryscreen.components.InventoryList
+import com.bigbingo.brickfinder.ui.screens.inventory.components.InventoryList
 import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 
 @Composable

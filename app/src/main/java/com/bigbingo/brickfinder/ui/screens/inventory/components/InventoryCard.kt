@@ -1,4 +1,4 @@
-package com.bigbingo.brickfinder.ui.screens.inventoryscreen.components
+package com.bigbingo.brickfinder.ui.screens.inventory.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.bigbingo.brickfinder.data.PartAppearance
-import com.bigbingo.brickfinder.viewmodel.PartsViewModel
 import com.bigbingo.brickfinder.viewmodel.SetsViewModel
 
 @Composable

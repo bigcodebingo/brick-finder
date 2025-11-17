@@ -14,7 +14,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-
 private val DarkColorScheme = darkColorScheme(
     primary = Color.Black,
     secondary = Color.Black,
@@ -38,17 +37,8 @@ private val LightColorScheme = lightColorScheme(
     secondary = Color.Green,
     onSecondary = Color.DarkGray,
 
-    tertiary = Color.Yellow,
-    onTertiary = Color.Black,
-
     background = Color.White,
     onBackground = Color.Black,
-
-    surface = Color.White,
-    onSurface = Color( 0xFF0788CA),
-
-
-    outline = Color.LightGray
 )
 
 @OptIn(ExperimentalFoundationApi::class)
