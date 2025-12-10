@@ -65,4 +65,8 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.14")
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("androidx.graphics:graphics-shapes:1.0.1")
+
+    implementation("com.google.android.filament:filament-android:1.67.0")
+    implementation("com.google.android.filament:gltfio-android:1.67.0")
+    implementation("com.google.android.filament:filament-utils-android:1.67.0")
 }

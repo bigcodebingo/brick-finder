@@ -22,7 +22,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.bigbingo.brickfinder.data.Item
 import com.bigbingo.brickfinder.data.Part
 import com.bigbingo.brickfinder.data.ItemType
@@ -33,6 +32,9 @@ import com.bigbingo.brickfinder.helpers.DatabaseHelper
 import com.bigbingo.brickfinder.ui.screens.partinfo.components.ColorList
 import com.bigbingo.brickfinder.ui.screens.PartTopBar
 import com.bigbingo.brickfinder.viewmodel.WantedListViewModel
+import com.bigbingo.brickfinder.ui.filament.FilamentAssets
+import com.bigbingo.brickfinder.ui.filament.FilamentModelView
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,12 +64,22 @@ fun PartInfoScreen(
         }
     }
 
+    val modelAssetPath = remember(part?.part_num) {
+        part?.part_num?.let { FilamentAssets.findModelAsset(context.assets, it) }
+    }
+    var modelFailed by remember(part?.part_num) { mutableStateOf(false) }
+    var showModel by remember(part?.part_num) { mutableStateOf(false) }
+
     var isInWantedList by remember { mutableStateOf(false) }
 
     LaunchedEffect(part?.part_num) {
         part?.part_num?.let { partNum ->
             isInWantedList = wantedListViewModel.isInWantedList(context, partNum, ItemType.PART)
         } ?: run { isInWantedList = false }
+    }
+    LaunchedEffect(part?.part_num) {
+        modelFailed = false
+        showModel = false
     }
 
     val isFirstLoad = remember { mutableStateOf(true) }
@@ -91,7 +103,6 @@ fun PartInfoScreen(
         Scaffold(
             topBar = {
                 PartTopBar(
-
                     partNum = part?.part_num,
                     categoryName = categoryName,
                     onBack = {
@@ -152,14 +163,34 @@ fun PartInfoScreen(
                         lineHeight = 18.sp
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = buildAnnotatedString {
-                            append("Item No: ")
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color(0xFF2C6EA5)))
-                            { append(p.part_num) } },
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 13.sp),
-                        lineHeight = 18.sp
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = buildAnnotatedString {
+                                append("Item No: ")
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color(0xFF2C6EA5)))
+                                { append(p.part_num) } },
+                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 13.sp),
+                            lineHeight = 18.sp
+                        )
+                        if (modelAssetPath != null) {
+                            Spacer(modifier = Modifier.width(12.dp))
+                            val label = if (showModel && !modelFailed) "3d model" else "image"
+                            Text(
+                                text = label,
+                                color = Color(0xFF2C6EA5),
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textDecoration = TextDecoration.Underline
+                                ),
+                                modifier = Modifier.clickable {
+                                    if (!modelFailed) {
+                                        showModel = !showModel
+                                    }
+                                }
+                            )
+                        }
+                    }
                     Spacer(modifier = Modifier.height(10.dp))
                     Box(
                         modifier = Modifier
@@ -173,14 +204,27 @@ fun PartInfoScreen(
                             .padding(5.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        AsyncImage(
-                            model = p.part_img_url,
-                            contentDescription = p.name,
-                            modifier = Modifier
-                                .size(if (isDefaultImage) 80.dp else 200.dp)
-                                .clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Fit
-                        )
+                        val show3D = modelAssetPath != null && !modelFailed
+                        if (show3D && showModel) {
+                            modelAssetPath.let { path ->
+                                FilamentModelView(
+                                    modelPath = path,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    onLoadFailed = { modelFailed = true }
+                                )
+                            }
+                        } else {
+                            AsyncImage(
+                                model = p.part_img_url,
+                                contentDescription = p.name,
+                                modifier = Modifier
+                                    .size(if (isDefaultImage) 80.dp else 200.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
