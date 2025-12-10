@@ -1,27 +1,8 @@
 package com.bigbingo.brickfinder.ui.filament
 
 import android.content.Context
-import android.content.res.AssetManager
 import android.view.Choreographer
 import android.view.SurfaceView
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.filament.IndirectLight
 import com.google.android.filament.Skybox
 import com.google.android.filament.View
@@ -31,39 +12,9 @@ import com.google.android.filament.utils.ModelViewer
 import com.google.android.filament.utils.Utils
 import java.nio.ByteBuffer
 
-/**
- * Утилиты для работы с Filament внутри Compose.
- */
-object FilamentAssets {
-    private const val MODELS_DIR = "models"
-
-    /**
-     * Ищет glb-файл модели для номера детали. Сначала пытается найти точное
-     * совпадение <partNum>.glb, затем – первый файл, который содержит partNum.
-     */
-    fun findModelAsset(assetManager: AssetManager, partNum: String): String? {
-        val trimmed = partNum.trim()
-        val files = runCatching { assetManager.list(MODELS_DIR)?.toList() }
-            .getOrNull()
-            .orEmpty()
-
-        val exact = files.firstOrNull {
-            it.equals("$trimmed.glb", ignoreCase = true) ||
-                it.equals(trimmed, ignoreCase = true)
-        }
-        if (exact != null) {
-            val fileName = if (exact.endsWith(".glb", ignoreCase = true)) exact else "$exact.glb"
-            return "$MODELS_DIR/$fileName"
-        }
-
-        val partial = files.firstOrNull { it.contains(trimmed, ignoreCase = true) }
-        return partial?.let { "$MODELS_DIR/$it" }
-    }
-}
-
 private const val DEFAULT_HDR_PATH = "envs/lightroom_14b.hdr"
 
-private class FilamentRenderer(
+class FilamentRenderer(
     private val context: Context,
     private val surfaceView: SurfaceView,
     hdrPath: String = DEFAULT_HDR_PATH,
@@ -89,12 +40,15 @@ private class FilamentRenderer(
         configureView(modelViewer.view)
         createIndirectLight(hdrPath)
     }
+    
     fun start() {
         choreographer.postFrameCallback(frameCallback)
     }
+    
     fun stop() {
         choreographer.removeFrameCallback(frameCallback)
     }
+    
     fun destroy() {
         stop()
     }
@@ -105,6 +59,7 @@ private class FilamentRenderer(
             hasModel = false
         }
     }
+    
     fun loadModel(assetPath: String): Boolean {
         val buffer = runCatching { readAsset(assetPath) }.getOrNull() ?: return false
         modelViewer.destroyModel()
@@ -199,49 +154,6 @@ private class FilamentRenderer(
             }
 
             modelViewer.render(frameTimeNanos)
-        }
-    }
-}
-
-@Composable
-fun FilamentModelView(
-    modelPath: String,
-    modifier: Modifier = Modifier,
-    onLoadFailed: () -> Unit = {},
-) {
-    val context = LocalContext.current
-    val surfaceView = remember { SurfaceView(context) }
-    val renderer = remember(surfaceView) { FilamentRenderer(context, surfaceView) }
-    var modelLoaded by remember { mutableStateOf<Boolean?>(null) }
-
-    LaunchedEffect(modelPath) {
-        val loaded = renderer.loadModel(modelPath)
-        modelLoaded = loaded
-        if (!loaded) onLoadFailed()
-    }
-
-    DisposableEffect(Unit) {
-        renderer.start()
-        onDispose { renderer.destroy() }
-    }
-
-    Box(
-        modifier = modifier
-            .background(Color(0xFF0F0F0F)),
-        contentAlignment = Alignment.Center
-    ) {
-        AndroidView(
-            factory = { surfaceView },
-            modifier = Modifier.fillMaxSize()
-        )
-        when (modelLoaded) {
-            null -> CircularProgressIndicator()
-            false -> Text(
-                text = "Не удалось загрузить 3D-модель",
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.bodyMedium
-            )
-            else -> Unit
         }
     }
 }

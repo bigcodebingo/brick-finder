@@ -13,5 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
-app/src/main/assets/brickfinder.db
+app/src/main/assets/
 
