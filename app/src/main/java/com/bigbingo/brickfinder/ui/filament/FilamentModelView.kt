@@ -39,13 +39,13 @@ fun FilamentModelView(
         if (modelLoaded == true) {
             renderer.start()
         }
-        onDispose { 
+        onDispose {
             renderer.stop()
         }
     }
 
     DisposableEffect(Unit) {
-        onDispose { 
+        onDispose {
             renderer.destroy()
         }
     }
@@ -73,4 +73,3 @@ fun FilamentModelView(
         )
     }
 }
-
