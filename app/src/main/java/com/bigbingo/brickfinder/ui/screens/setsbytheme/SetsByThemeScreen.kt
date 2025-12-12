@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import com.bigbingo.brickfinder.helpers.SensorHelper
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
@@ -66,6 +68,29 @@ fun SetsThemeScreen(
     LaunchedEffect(sets) {
         if (sets.isNotEmpty()) {
             isFirstLoad.value = false
+        }
+    }
+
+    val sensorHelper = remember { SensorHelper(context) }
+    
+    DisposableEffect(Unit) {
+        sensorHelper.startListening()
+        onDispose {
+            sensorHelper.stopListening()
+        }
+    }
+    
+    LaunchedEffect(currentPage, totalPages) {
+        sensorHelper.onTiltLeft = {
+            if (currentPage > 1) {
+                viewModel.setCurrentPage(currentPage - 1)
+            }
+        }
+        
+        sensorHelper.onTiltRight = {
+            if (currentPage < totalPages) {
+                viewModel.setCurrentPage(currentPage + 1)
+            }
         }
     }
 

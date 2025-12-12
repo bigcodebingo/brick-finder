@@ -14,6 +14,7 @@ import com.bigbingo.brickfinder.ui.screens.PaginationBar
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.components.PartsGrid
 import com.bigbingo.brickfinder.ui.screens.partsbycategory.components.CategoryTopAppBar
 import com.bigbingo.brickfinder.ui.screens.LoadingScreen
+import com.bigbingo.brickfinder.helpers.SensorHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +42,29 @@ fun PartsByCategoryScreen(
     LaunchedEffect(parts) {
         if (parts.isNotEmpty()) {
             isFirstLoad.value = false
+        }
+    }
+
+    val sensorHelper = remember { SensorHelper(context) }
+    
+    DisposableEffect(Unit) {
+        sensorHelper.startListening()
+        onDispose {
+            sensorHelper.stopListening()
+        }
+    }
+    
+    LaunchedEffect(currentPage, totalPages) {
+        sensorHelper.onTiltLeft = {
+            if (currentPage > 1) {
+                viewModel.fetchPartsPage(categoryId, currentPage - 1, pageSize, context)
+            }
+        }
+        
+        sensorHelper.onTiltRight = {
+            if (currentPage < totalPages) {
+                viewModel.fetchPartsPage(categoryId, currentPage + 1, pageSize, context)
+            }
         }
     }
 
